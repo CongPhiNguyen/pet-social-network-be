@@ -43,8 +43,8 @@ const userSchema = new mongoose.Schema(
     followers: [{ type: mongoose.Types.ObjectId, ref: "user" }],
     following: [{ type: mongoose.Types.ObjectId, ref: "user" }],
     saved: [{ type: mongoose.Types.ObjectId, ref: "user" }],
-    otp_enable: { type: Boolean, default: false },
-    otpInfo: { type: Object, default: {} }
+    otpEnabled: { type: Boolean, required: true, default: false },
+    otpInfo: { type: Object, required: true, default: {} }
   },
   {
     timestamps: true

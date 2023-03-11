@@ -159,13 +159,12 @@ const authCtrl = {
   },
   verifyOTP: async (req, res) => {
     const { userId, token } = req.body
+    console.log(userId, token)
     const user = await Users.findById(userId)
-    console.log(user)
-    const message = "Token is invalid or user doesn't exist"
     if (!user) {
       return res.status(401).json({
         status: "fail",
-        message
+        message: "User is not exist"
       })
     }
 
@@ -174,32 +173,31 @@ const authCtrl = {
     const verified = speakeasy.totp.verify({
       secret: user?.otpInfo?.otp_base32,
       encoding: "base32",
-      token
+      token: token
     })
 
-    console.log(verified)
+    console.log("verified", verified)
 
-    if (!verified) {
-      return res.status(401).json({
-        status: "fail",
-        message
-      })
-    }
+    // if (!verified) {
+    //   return res.status(401).json({
+    //     status: "fail",
+    //     message: "Token is not valid"
+    //   })
+    // }
 
-    const updatedUser = Users.findByIdAndUpdate(userId, {
-      otpInfo: {
-        otp_enabled: true,
-        otp_verified: true
-      }
+    const updatedUser = await Users.findByIdAndUpdate(userId, {
+      $set: { "otpInfo.otpVerified": true },
+      otpEnabled: true
     })
 
     res.status(200).json({
-      otp_verified: true,
+      success: true,
+      otpVerified: true,
       user: {
         id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
-        otp_enabled: updatedUser.otpInfo.otp_enabled
+        otpEnabled: updatedUser.otpEnabled
       }
     })
   }
