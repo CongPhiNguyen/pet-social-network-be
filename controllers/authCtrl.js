@@ -185,21 +185,34 @@ const authCtrl = {
     //   })
     // }
 
-    const updatedUser = await Users.findByIdAndUpdate(userId, {
-      $set: { "otpInfo.otpVerified": true },
-      otpEnabled: true
-    })
+    const updatedUser = await Users.findByIdAndUpdate(
+      userId,
+      {
+        $set: { "otpInfo.otpVerified": true },
+        otpEnabled: true
+      },
+      { new: true }
+    ).lean()
 
     res.status(200).json({
       success: true,
       otpVerified: true,
-      user: {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        otpEnabled: updatedUser.otpEnabled
-      }
+      user: updatedUser
     })
+  },
+  disable2Factor: async (req, res) => {
+    const { userId } = req.body
+    const updateUser = await Users.findByIdAndUpdate(
+      userId,
+      {
+        otpEnabled: false
+      },
+      { new: true }
+    ).lean()
+    if (!updateUser) {
+      res.status(404).send({ success: false, message: "UserId not found" })
+    }
+    res.status(200).send({ success: true, updateUser: updateUser })
   }
 }
 

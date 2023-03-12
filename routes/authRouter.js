@@ -10,6 +10,9 @@ router.post("/logout", authCtrl.logout)
 router.post("/refresh_token", authCtrl.generateAccessToken)
 
 router.post("/auth/otp/generate", authCtrl.generateOTP)
+
 router.post("/auth/otp/verify", authCtrl.verifyOTP)
+
+router.post("/auth/otp/disable", authCtrl.disable2Factor)
 
 module.exports = router
