@@ -57,9 +57,7 @@ const authCtrl = {
   },
   login: async (req, res) => {
     try {
-      const { email, password } = req.body
-      console.log(email)
-      console.log(password)
+      const { email, password, token } = req.body
       const user = await Users.findOne({ email }).populate(
         "followers following",
         "avatar username fullname followers following"
@@ -71,6 +69,21 @@ const authCtrl = {
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch)
         return res.status(400).json({ msg: "Password is incorrect." })
+      if (user.otpEnabled) {
+        const verified = speakeasy.totp.verify({
+          secret: user?.otpInfo?.otp_base32,
+          encoding: "base32",
+          token: token
+        })
+        console.log(user?.otpInfo?.otp_base32, token)
+        console.log(verified)
+        if (!verified) {
+          return res.status(401).json({
+            status: "fail",
+            msg: "Token is not valid"
+          })
+        }
+      }
 
       const access_token = createAccessToken({ id: user._id })
       const refresh_token = createRefreshToken({ id: user._id })
@@ -142,14 +155,19 @@ const authCtrl = {
       name: email,
       length: 15
     })
-    const userUpdateOTP = await Users.findByIdAndUpdate(userId, {
-      otpInfo: {
-        otp_ascii: ascii,
-        otp_auth_url: otpauth_url,
-        otp_base32: base32,
-        otp_hex: hex
-      }
-    }).lean()
+
+    const userUpdateOTP = await Users.findByIdAndUpdate(
+      userId,
+      {
+        otpInfo: {
+          otp_ascii: ascii,
+          otp_auth_url: otpauth_url,
+          otp_base32: base32,
+          otp_hex: hex
+        }
+      },
+      { new: true }
+    ).lean()
     console.log(userUpdateOTP)
     res.status(200).json({
       success: true,
@@ -159,7 +177,6 @@ const authCtrl = {
   },
   verifyOTP: async (req, res) => {
     const { userId, token } = req.body
-    console.log(userId, token)
     const user = await Users.findById(userId)
     if (!user) {
       return res.status(401).json({
@@ -168,22 +185,18 @@ const authCtrl = {
       })
     }
 
-    console.log(user?.otpInfo?.otp_base32)
-
     const verified = speakeasy.totp.verify({
       secret: user?.otpInfo?.otp_base32,
       encoding: "base32",
       token: token
     })
 
-    console.log("verified", verified)
-
-    // if (!verified) {
-    //   return res.status(401).json({
-    //     status: "fail",
-    //     message: "Token is not valid"
-    //   })
-    // }
+    if (!verified) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Token is not valid"
+      })
+    }
 
     const updatedUser = await Users.findByIdAndUpdate(
       userId,
