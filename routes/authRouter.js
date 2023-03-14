@@ -7,6 +7,8 @@ router.post("/login", authCtrl.login)
 
 router.post("/logout", authCtrl.logout)
 
+router.post("/forgot-password", authCtrl.forgotPassword)
+
 router.post("/refresh_token", authCtrl.generateAccessToken)
 
 router.post("/auth/otp/generate", authCtrl.generateOTP)

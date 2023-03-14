@@ -226,6 +226,38 @@ const authCtrl = {
       res.status(404).send({ success: false, message: "UserId not found" })
     }
     res.status(200).send({ success: true, updateUser: updateUser })
+  },
+  forgotPassword: async (req, res) => {
+    const { email, token } = req.body
+    // find email
+    const userFind = await Users.findOne({ email: email })
+    if (!userFind) {
+      res
+        .status(400)
+        .send({ success: false, message: `Email "${email}" not existed` })
+      return
+    }
+    // verify token
+    const verified = speakeasy.totp.verify({
+      secret: userFind?.otpInfo?.otp_base32,
+      encoding: "base32",
+      token: token
+    })
+
+    if (!verified) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Token is not valid"
+      })
+    }
+
+    res
+      .status(200)
+      .send({
+        success: true,
+        email: email,
+        secret: userFind?.otpInfo?.otp_base32
+      })
   }
 }
 
