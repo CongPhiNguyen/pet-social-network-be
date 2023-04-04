@@ -5,56 +5,48 @@ const speakeasy = require("speakeasy")
 
 const authCtrl = {
   register: async (req, res) => {
-    try {
-      const { fullname, username, email, password, gender } = req.body
-      let newUserName = username.toLowerCase().replace(/ /g, "")
+    console.log(req.body)
+    const { fullname, username, email, password, gender } = req.body
+    let newUserName = username.toLowerCase().replace(/ /g, "")
 
-      const user_name = await Users.findOne({ username: newUserName })
-      if (user_name)
-        return res.status(400).json({ msg: "This user name already exists." })
+    const user_name = await Users.findOne({ username: newUserName })
+    if (user_name)
+      return res.status(400).json({ msg: "This user name already exists." })
 
-      const user_email = await Users.findOne({ email })
-      if (user_email)
-        return res.status(400).json({ msg: "This email already exists." })
+    const user_email = await Users.findOne({ email })
+    if (user_email)
+      return res.status(400).json({ msg: "This email already exists." })
 
-      if (password.length < 6)
-        return res
-          .status(400)
-          .json({ msg: "Password must be at least 6 characters." })
+    if (password.length < 6)
+      return res
+        .status(400)
+        .json({ msg: "Password must be at least 6 characters." })
 
-      const passwordHash = await bcrypt.hash(password, 12)
+    const passwordHash = await bcrypt.hash(password, 12)
 
-      const newUser = new Users({
-        fullname,
-        username: newUserName,
-        email,
-        password: passwordHash,
-        gender
-      })
+    const newUser = new Users({
+      fullname,
+      username: newUserName,
+      email,
+      password: passwordHash,
+      gender
+    })
 
-      const access_token = createAccessToken({ id: newUser._id })
-      const refresh_token = createRefreshToken({ id: newUser._id })
+    await newUser.save()
 
-      res.cookie("refreshtoken", refresh_token, {
-        httpOnly: true,
-        path: "/api/refresh_token",
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30days
-      })
-
-      await newUser.save()
-
-      res.json({
-        msg: "Register Success!",
-        access_token,
-        user: {
-          ...newUser._doc,
-          password: ""
-        }
-      })
-    } catch (err) {
-      return res.status(500).json({ msg: err.message })
-    }
+    res.status(200).json({
+      msg: "Register Success!",
+      user: {
+        ...newUser._doc,
+        password: ""
+      }
+    })
   },
+
+  verifyEmail: async (req, res) => {
+    res.status(200).send({ success: true })
+  },
+
   login: async (req, res) => {
     try {
       const { email, password, token } = req.body
@@ -75,8 +67,6 @@ const authCtrl = {
           encoding: "base32",
           token: token
         })
-        console.log(user?.otpInfo?.otp_base32, token)
-        console.log(verified)
         if (!verified) {
           return res.status(401).json({
             status: "fail",
@@ -168,7 +158,6 @@ const authCtrl = {
       },
       { new: true }
     ).lean()
-    console.log(userUpdateOTP)
     res.status(200).json({
       success: true,
       base32,
@@ -251,13 +240,11 @@ const authCtrl = {
       })
     }
 
-    res
-      .status(200)
-      .send({
-        success: true,
-        email: email,
-        secret: userFind?.otpInfo?.otp_base32
-      })
+    res.status(200).send({
+      success: true,
+      email: email,
+      secret: userFind?.otpInfo?.otp_base32
+    })
   }
 }
 
