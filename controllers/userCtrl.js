@@ -33,6 +33,12 @@ const userCtrl = {
     res.status(200).send({ success: true, user: userEmail })
   },
 
+  getEmailWithId: async (req, res) => {
+    const id = req.params.id
+    const user = await Users.findById(id)
+    res.status(200).send({ success: true, email: user.email })
+  },
+
   updateUser: async (req, res) => {
     try {
       const { avatar, fullname, mobile, address, story, website, gender } =
