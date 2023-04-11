@@ -50,8 +50,6 @@ const authCtrl = {
     login: async (req, res) => {
         try {
             const { email, password } = req.body
-            console.log(email)
-            console.log(password)
             const user = await Users.findOne({ email })
                 .populate("followers following", "avatar username fullname followers following")
 
