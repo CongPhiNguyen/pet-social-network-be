@@ -1,3 +1,4 @@
+const sendMailNode = require("../helpers/sendMail")
 const Users = require("../models/userModel")
 
 const userCtrl = {
@@ -36,7 +37,25 @@ const userCtrl = {
   getEmailWithId: async (req, res) => {
     const id = req.params.id
     const user = await Users.findById(id)
+    if (!user) {
+      res.status(400).send({ success: false })
+    }
     res.status(200).send({ success: true, email: user.email })
+  },
+
+  sendEmailVerify: async (req, res) => {
+    const result = await sendMailNode(
+      "CODE",
+      "code",
+      "congphinguyen312@gmail.com"
+    )
+    res.status(200).send({ success: true, result: result })
+  },
+
+  verifyEmail: async (req, res) => {
+    console.log(req.params)
+    console.log(req.body)
+    res.status(200).send({ success: true })
   },
 
   updateUser: async (req, res) => {
