@@ -170,6 +170,11 @@ const userCtrl = {
     } catch (err) {
       return res.status(500).json({ msg: err.message })
     }
+  },
+
+  getAllUser: async (req, res) => {
+    const users = await Users.find({})
+    res.status(200).send(users)
   }
 }
 
