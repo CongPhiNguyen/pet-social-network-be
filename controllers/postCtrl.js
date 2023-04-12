@@ -20,13 +20,13 @@ class APIfeatures {
 const postCtrl = {
   createPost: async (req, res) => {
     try {
-      const { content, images } = req.body
-
+      const { content, images, location } = req.body
       if (images.length === 0)
         return res.status(400).json({ msg: "Please add your photo." })
 
       const newPost = new Posts({
         content,
+        location,
         images,
         user: req.user._id
       })
@@ -74,12 +74,13 @@ const postCtrl = {
   },
   updatePost: async (req, res) => {
     try {
-      const { content, images } = req.body
+      const { content, images, location } = req.body
 
       const post = await Posts.findOneAndUpdate(
         { _id: req.params.id },
         {
           content,
+          location,
           images
         }
       )
@@ -183,7 +184,6 @@ const postCtrl = {
     }
   },
   getPostsDicover: async (req, res) => {
-    // Lẫy nhũng post của người chưa follow
     try {
       const newArr = [...req.user.following, req.user._id]
 
