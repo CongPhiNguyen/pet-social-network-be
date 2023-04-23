@@ -58,6 +58,8 @@ const authCtrl = {
       if (!user)
         return res.status(400).json({ msg: "This email does not exist." })
 
+      // Check if is verify email
+
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch)
         return res.status(400).json({ msg: "Password is incorrect." })

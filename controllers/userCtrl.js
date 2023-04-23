@@ -35,7 +35,7 @@ const userCtrl = {
   },
 
   getEmailWithId: async (req, res) => {
-    const id = req.params.id
+    const id = req?.params?.id
     const user = await Users.findById(id)
     if (!user) {
       res.status(400).send({ success: false })
@@ -171,10 +171,42 @@ const userCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
-
   getAllUser: async (req, res) => {
     const users = await Users.find({})
     res.status(200).send(users)
+  },
+
+  getAllFollower: async (req, res) => {
+    const { id } = req.params
+    const user = await Users.findById(id)
+    if (!user) {
+      res.status(200).send({ success: true, followers: [] })
+    }
+    const followerIdList = user.followers
+    const userList = await Users.find({ _id: { $in: followerIdList } })
+    res.status(200).send({ success: true, followers: userList })
+  },
+
+  getAllFollowing: async (req, res) => {
+    const { id } = req.params
+    const user = await Users.findById(id)
+    if (!user) {
+      res.status(200).send({ success: true, following: [] })
+    }
+    const followingIdList = user.following
+    const userList = await Users.find({ _id: { $in: followingIdList } })
+    res.status(200).send({ success: true, following: userList })
+  },
+
+  getUserInfo: async (req, res) => {
+    try {
+      const user = await Users.findById(req.params.id).select("-password")
+      if (!user) return res.status(400).json({ msg: "User does not exist." })
+
+      res.json({ user })
+    } catch (err) {
+      return res.status(500).json({ msg: err.message })
+    }
   }
 }
 
