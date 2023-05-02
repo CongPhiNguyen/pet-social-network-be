@@ -57,32 +57,6 @@ const userCtrl = {
     console.log(req.body)
     res.status(200).send({ success: true })
   },
-
-  updateUser: async (req, res) => {
-    try {
-      const { avatar, fullname, mobile, address, story, website, gender } =
-        req.body
-      if (!fullname)
-        return res.status(400).json({ msg: "Please add your full name." })
-
-      await Users.findOneAndUpdate(
-        { _id: req.user._id },
-        {
-          avatar,
-          fullname,
-          mobile,
-          address,
-          story,
-          website,
-          gender
-        }
-      )
-
-      res.json({ msg: "Update Success!" })
-    } catch (err) {
-      return res.status(500).json({ msg: err.message })
-    }
-  },
   follow: async (req, res) => {
     try {
       const user = await Users.find({
@@ -206,6 +180,16 @@ const userCtrl = {
       res.json({ user })
     } catch (err) {
       return res.status(500).json({ msg: err.message })
+    }
+  },
+  updateUserInfo: async (req, res) => {
+    const { id } = req.params
+    const data = req.body
+    const updateVal = await Users.findByIdAndUpdate(id, data, { new: true })
+    if (updateVal) {
+      res.status(200).send({ success: true, updateVal })
+    } else {
+      res.status(400).send({ success: false })
     }
   }
 }
