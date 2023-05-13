@@ -7,7 +7,8 @@ const logSchema = new mongoose.Schema(
     status: Number,
     contentLength: Number,
     responseTime: Number,
-    message: String
+    message: String,
+    userId: String
   },
   {
     timestamps: true

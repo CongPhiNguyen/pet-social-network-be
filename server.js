@@ -9,6 +9,7 @@ const path = require("path")
 const morgan = require("morgan")
 const Log = require("./models/logsModel")
 const morganBody = require("morgan-body")
+const jwt = require("jsonwebtoken")
 
 const app = express()
 app.use(express.json())
@@ -27,38 +28,48 @@ io.on("connection", (socket) => {
 ExpressPeerServer(http, { path: "/" })
 
 // Logs
+
+// sử dụng middleware morgan để log request
 app.use(
-  morgan("dev", {
-    stream: {
-      write: function (message) {
-        const messageSplit = message.split(" ")
-        // tạo một document mới cho log
-        console.log(messageSplit)
-        console.log({
-          method: messageSplit[0].slice(7),
-          url: messageSplit[1],
-          status: messageSplit[2].slice(7, 3),
-          contentLength: Number(messageSplit[3]),
-          responseTime: messageSplit[6].slice(messageSplit[6].indexOf(`\\`)),
-          message: message
-        })
-        // const log = new Log({
-        //   method: messageSplit[0].slice(7),
-        //   url: messageSplit[2].slice(7),
-        //   status: messageSplit[3],
-        //   contentLength: Number(messageSplit[4]),
-        //   responseTime: messageSplit[6].split(messageSplit[6].indexOf(`\\`))
-        // })
-        // lưu document vào MongoDB
-        // log.save(function (err) {
-        //   if (err) {
-        //     // console.log(err)
-        //   }
-        // })
-      }
-    }
+  morgan(function (tokens, req, res) {
+    // trả về một chuỗi JSON chứa thông tin request
+    return JSON.stringify({
+      method: tokens.method(req, res),
+      url: tokens.url(req, res),
+      status: tokens.status(req, res),
+      responseTime: tokens["response-time"](req, res)
+    })
   })
 )
+
+// sử dụng middleware để lưu log vào MongoDB
+app.use(function (req, res, next) {
+  let userId = ""
+  try {
+    const token = req.header("Authorization")
+    if (token) {
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+      userId = decoded.id
+    }
+  } catch (e) {}
+  // tạo một document mới cho log
+  const log = new Log({
+    method: req.method,
+    url: req.originalUrl,
+    status: res.statusCode,
+    responseTime: Date.now() - req._startTime,
+    userId: userId
+  })
+
+  // lưu document vào MongoDB
+  log.save(function (err) {
+    if (err) {
+      console.log(err)
+    }
+  })
+
+  next()
+})
 
 // Routes
 app.use("/api", require("./routes/authRouter"))
