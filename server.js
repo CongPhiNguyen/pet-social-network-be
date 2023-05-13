@@ -6,6 +6,9 @@ const cookieParser = require("cookie-parser")
 const SocketServer = require("./socketServer")
 const { ExpressPeerServer } = require("peer")
 const path = require("path")
+const morgan = require("morgan")
+const Log = require("./models/logsModel")
+const morganBody = require("morgan-body")
 
 const app = express()
 app.use(express.json())
@@ -22,6 +25,40 @@ io.on("connection", (socket) => {
 
 // Create peer server
 ExpressPeerServer(http, { path: "/" })
+
+// Logs
+app.use(
+  morgan("dev", {
+    stream: {
+      write: function (message) {
+        const messageSplit = message.split(" ")
+        // tạo một document mới cho log
+        console.log(messageSplit)
+        console.log({
+          method: messageSplit[0].slice(7),
+          url: messageSplit[1],
+          status: messageSplit[2].slice(7, 3),
+          contentLength: Number(messageSplit[3]),
+          responseTime: messageSplit[6].slice(messageSplit[6].indexOf(`\\`)),
+          message: message
+        })
+        // const log = new Log({
+        //   method: messageSplit[0].slice(7),
+        //   url: messageSplit[2].slice(7),
+        //   status: messageSplit[3],
+        //   contentLength: Number(messageSplit[4]),
+        //   responseTime: messageSplit[6].split(messageSplit[6].indexOf(`\\`))
+        // })
+        // lưu document vào MongoDB
+        // log.save(function (err) {
+        //   if (err) {
+        //     // console.log(err)
+        //   }
+        // })
+      }
+    }
+  })
+)
 
 // Routes
 app.use("/api", require("./routes/authRouter"))
@@ -47,12 +84,12 @@ mongoose.connect(
   }
 )
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static("client/build"))
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client", "build", "index.html"))
-  })
-}
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static("client/build"))
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.join(__dirname, "client", "build", "index.html"))
+//   })
+// }
 
 const port = process.env.PORT || 5000
 http.listen(port, () => {
