@@ -14,8 +14,7 @@ const petSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
-      trim: true,
-      unique: true
+      trim: true
     },
     dateOfBirth: {
       type: String,
@@ -23,6 +22,10 @@ const petSchema = new mongoose.Schema(
     },
     weight: {
       type: Number,
+      required: true
+    },
+    owner: {
+      type: String,
       required: true
     }
   },
