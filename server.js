@@ -79,6 +79,7 @@ app.use("/api", require("./routes/commentRouter"))
 app.use("/api", require("./routes/notifyRouter"))
 app.use("/api", require("./routes/messageRouter"))
 app.use("/api", require("./routes/petRouter"))
+app.use("/api", require("./routes/logRouter"))
 
 const URI = process.env.MONGODB_URL
 mongoose.connect(
