@@ -2,7 +2,7 @@ const { Configuration, OpenAIApi } = require("openai");
 
 class gptCtrl {
     configuration = new Configuration({
-        apiKey: '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',
+        apiKey: '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',
     });
 
     openai = new OpenAIApi(this.configuration);
@@ -22,6 +22,8 @@ class gptCtrl {
                 const response = await this.openai.createCompletion({
                     model: "text-davinci-003",
                     prompt: message,
+                    max_tokens: 100,
+                    temperature: 0.9
                 });
 
 
