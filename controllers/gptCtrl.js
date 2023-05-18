@@ -2,13 +2,58 @@ const { Configuration, OpenAIApi } = require("openai");
 
 class gptCtrl {
     configuration = new Configuration({
-        apiKey: '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',
+        apiKey: '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',
     });
 
     openai = new OpenAIApi(this.configuration);
 
-    getChat = () => {
-        return true
+    getChat = (req, res) => {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.flushHeaders();
+        const message = req.query.message
+        console.log({ message })
+        if (!message) {
+            return res.status(400).json({ error: 'Message is required.' });
+        }
+
+        const sendEvent = (data) => {
+            res.write(`data: ${(data)}\n\n`);
+        };
+        const generateChat = async () => {
+            try {
+                const response = await this.openai.createCompletion({
+                    model: "text-davinci-003",
+                    prompt: message,
+                    max_tokens: 500,
+                    temperature: 0.9,
+                    stream: true,
+                }, { responseType: 'stream' },);
+                response.data.on('data', (data) => {
+                    const lines = data
+                        .toString()
+                        .split('\n')
+                        .filter((line) => line.trim() !== '');
+
+                    for (const line of lines) {
+                        const message = line.replace(/^data: /, '');
+                        if (message === '[DONE]') {
+                            return;
+                        }
+                        const parsed = JSON.parse(message);
+                        sendEvent(parsed.choices[0].text)
+                    }
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                res.end();
+            }
+        };
+
+        generateChat();
+
     }
 
     chat = async (req, res) => {
