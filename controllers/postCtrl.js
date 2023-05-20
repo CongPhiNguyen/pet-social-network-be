@@ -1,7 +1,7 @@
 const Posts = require("../models/postModel")
 const Comments = require("../models/commentModel")
 const Users = require("../models/userModel")
-
+const ObjectId = require("mongodb").ObjectId
 class APIfeatures {
   constructor(query, queryString) {
     this.query = query
@@ -45,12 +45,7 @@ const postCtrl = {
   },
   getPosts: async (req, res) => {
     try {
-      const features = new APIfeatures(
-        Posts.find({
-          user: [...req.user.following, req.user._id]
-        }),
-        req.query
-      ).paginating()
+      const features = new APIfeatures(Posts.find({}), req.query).paginating()
 
       const posts = await features.query
         .sort("-createdAt")
@@ -280,6 +275,19 @@ const postCtrl = {
     } catch (err) {
       return res.status(500).json({ msg: err.message })
     }
+  },
+  getPostByUserId: async (req, res) => {
+    const { id } = req.params
+    const postList = await Posts.find({ user: ObjectId(id) })
+      .populate("user likes", "avatar username fullname followers")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "user likes",
+          select: "-password"
+        }
+      })
+    res.status(200).send({ success: true, postList: postList })
   }
 }
 
