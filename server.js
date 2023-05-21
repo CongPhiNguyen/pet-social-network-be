@@ -51,7 +51,7 @@ app.use(function (req, res, next) {
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
       userId = decoded.id
     }
-  } catch (e) {}
+  } catch (e) { }
   // tạo một document mới cho log
   const log = new Log({
     method: req.method,
@@ -80,6 +80,7 @@ app.use("/api", require("./routes/notifyRouter"))
 app.use("/api", require("./routes/messageRouter"))
 app.use("/api", require("./routes/petRouter"))
 app.use("/api", require("./routes/logRouter"))
+app.use("/api", require("./routes/gptRouter"))
 
 const URI = process.env.MONGODB_URL
 mongoose.connect(
