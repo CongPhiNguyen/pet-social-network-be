@@ -1,8 +1,8 @@
 const { Configuration, OpenAIApi } = require("openai");
-
+const API_KEY = process.env.CHAT_GPT_KEY
 class gptCtrl {
     configuration = new Configuration({
-        apiKey: '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',
+        apiKey: API_KEY,
     });
 
     openai = new OpenAIApi(this.configuration);
