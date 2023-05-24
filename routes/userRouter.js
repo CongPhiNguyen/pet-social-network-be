@@ -11,6 +11,7 @@ router.post("/user/:id/send-email", userCtrl.sendEmailVerify)
 router.patch("/user/:id/follow", auth, userCtrl.follow)
 router.patch("/user/:id/unfollow", auth, userCtrl.unfollow)
 router.get("/user", userCtrl.getUserWithEmail)
+router.get("user", userCtrl.getUserWithEmail)
 
 router.get("/suggestionsUser", auth, userCtrl.suggestionsUser)
 router.get("/get-all-user", userCtrl.getAllUser)
