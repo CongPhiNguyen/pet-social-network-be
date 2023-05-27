@@ -1,10 +1,10 @@
 const Conversations = require("../models/conversationModel")
 const Messages = require("../models/messageModel")
-const dialogflow = require("dialogflow")
-const uuid = require("uuid")
-const sessionClient = new dialogflow.SessionsClient()
-const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
-require("dotenv").config({ path: "./.env" })
+// const dialogflow = require("dialogflow")
+// const uuid = require("uuid")
+// const sessionClient = new dialogflow.SessionsClient()
+// const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
+// require("dotenv").config({ path: "./.env" })
 class APIfeatures {
   constructor(query, queryString) {
     this.query = query

@@ -11,6 +11,8 @@ router.post("/forgot-password", authCtrl.forgotPassword)
 
 router.post("/refresh_token", authCtrl.generateAccessToken)
 
+router.get("/refresh-v2", authCtrl.generateAccessTokenV2)
+
 router.post("/auth/otp/generate", authCtrl.generateOTP)
 
 router.post("/auth/otp/verify", authCtrl.verifyOTP)
