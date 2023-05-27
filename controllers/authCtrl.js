@@ -5,7 +5,6 @@ const speakeasy = require("speakeasy")
 
 const authCtrl = {
   register: async (req, res) => {
-    console.log(req.body)
     const { fullname, username, email, password, gender } = req.body
     let newUserName = username.toLowerCase().replace(/ /g, "")
 
@@ -109,7 +108,6 @@ const authCtrl = {
   },
   generateAccessToken: async (req, res) => {
     try {
-      console.log("req.cookies", req.cookies)
       const rf_token = req.cookies.refreshtoken
       if (!rf_token) return res.status(400).json({ msg: "Please login now." })
 
@@ -143,29 +141,24 @@ const authCtrl = {
   },
 
   generateAccessTokenV2: async (req, res) => {
-    console.log(req.query)
     try {
       const { refreshToken } = req.query
-      // const rf_token = req.cookies.refreshtoken
       if (!refreshToken) {
         return res
           .status(400)
           .json({ msg: "Please login now.", error: "Your token is missing" })
       }
-      console.log(refreshToken, process.env.REFRESH_TOKEN_SECRET)
       jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET,
         async (err, result) => {
           if (err) {
-            console.log("Refresh token bị cl gì á")
             console.log(err)
             return res.status(400).json({
               msg: "Please login now.",
               error: "Your token is not valid"
             })
           }
-          console.log("result nè", result)
           const user = await Users.findById(result.id)
             .select("-password")
             .populate(

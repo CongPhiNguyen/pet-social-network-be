@@ -2,6 +2,7 @@ const Posts = require("../models/postModel")
 const Comments = require("../models/commentModel")
 const Users = require("../models/userModel")
 const ObjectId = require("mongodb").ObjectId
+const { isObjectId } = require("../helpers/stringValidation")
 class APIfeatures {
   constructor(query, queryString) {
     this.query = query
@@ -278,6 +279,9 @@ const postCtrl = {
   },
   getPostByUserId: async (req, res) => {
     const { id } = req.params
+    if (!isObjectId(id)) {
+      return res.status(400).json({ msg: "UserId is not valid" })
+    }
     const postList = await Posts.find({ user: ObjectId(id) })
       .populate("user likes", "avatar username fullname followers")
       .populate({

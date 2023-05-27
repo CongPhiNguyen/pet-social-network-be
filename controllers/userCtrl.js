@@ -1,4 +1,5 @@
 const sendMailNode = require("../helpers/sendMail")
+const { isObjectId } = require("../helpers/stringValidation")
 const Users = require("../models/userModel")
 
 const userCtrl = {
@@ -17,6 +18,9 @@ const userCtrl = {
   },
   getUser: async (req, res) => {
     try {
+      if (!isObjectId(req.params.id)) {
+        return res.status(400).json({ msg: "UserId is not valid" })
+      }
       const user = await Users.findById(req.params.id)
         .select("-password")
         .populate("followers following", "-password")
@@ -36,6 +40,9 @@ const userCtrl = {
 
   getEmailWithId: async (req, res) => {
     const id = req?.params?.id
+    if (!isObjectId(id)) {
+      return res.status(400).json({ msg: "UserId is not valid" })
+    }
     const user = await Users.findById(id)
     if (!user) {
       res.status(400).send({ success: false })
@@ -152,6 +159,9 @@ const userCtrl = {
 
   getAllFollower: async (req, res) => {
     const { id } = req.params
+    if (!isObjectId(id)) {
+      return res.status(400).json({ msg: "UserId is not valid" })
+    }
     const user = await Users.findById(id)
     if (!user) {
       res.status(200).send({ success: true, followers: [] })
@@ -163,6 +173,9 @@ const userCtrl = {
 
   getAllFollowing: async (req, res) => {
     const { id } = req.params
+    if (!isObjectId(id)) {
+      return res.status(400).json({ msg: "UserId is not valid" })
+    }
     const user = await Users.findById(id)
     if (!user) {
       res.status(200).send({ success: true, following: [] })
@@ -173,10 +186,12 @@ const userCtrl = {
   },
 
   getUserInfo: async (req, res) => {
+    if (!isObjectId(req.params.id)) {
+      return res.status(400).json({ msg: "UserId is not valid" })
+    }
     try {
       const user = await Users.findById(req.params.id).select("-password")
-      if (!user) return res.status(400).json({ msg: "User does not exist." })
-
+      if (!user) return res.status(404).json({ msg: "User does not exist." })
       res.json({ user })
     } catch (err) {
       return res.status(500).json({ msg: err.message })
@@ -185,6 +200,9 @@ const userCtrl = {
   updateUserInfo: async (req, res) => {
     const { id } = req.params
     const data = req.body
+    if (!isObjectId(id)) {
+      return res.status(400).json({ msg: "UserId is not valid" })
+    }
     const updateVal = await Users.findByIdAndUpdate(id, data, { new: true })
     if (updateVal) {
       res.status(200).send({ success: true, updateVal })

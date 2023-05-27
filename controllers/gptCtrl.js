@@ -14,7 +14,6 @@ class gptCtrl {
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.flushHeaders()
     const message = req.query.message
-    console.log({ message })
     if (!message) {
       return res.status(400).json({ error: "Message is required." })
     }

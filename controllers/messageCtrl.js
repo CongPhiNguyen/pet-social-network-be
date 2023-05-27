@@ -129,7 +129,6 @@ const messageCtrl = {
     }
   },
   dialogFlowApi: async (req, res) => {
-    console.log(req.body)
     const request = {
       session: sessionPath,
       queryInput: {
