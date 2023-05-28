@@ -27,6 +27,9 @@ const petSchema = new mongoose.Schema(
     owner: {
       type: String,
       required: true
+    },
+    petType: {
+      type: String
     }
   },
   {
