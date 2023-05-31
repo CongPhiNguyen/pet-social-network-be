@@ -33,8 +33,10 @@ const userCtrl = {
   },
 
   getUserWithEmail: async (req, res) => {
-    const { email } = req.query
-    const userEmail = await Users.findOne({ email: email })
+    const { pattern } = req.query
+    const userEmail = await Users.findOne({
+      $or: [{ email: pattern }, { username: pattern }]
+    })
     res.status(200).send({ success: true, user: userEmail })
   },
 

@@ -48,17 +48,21 @@ const authCtrl = {
 
   login: async (req, res) => {
     try {
-      const { email, password, token } = req.body
-      const user = await Users.findOne({ email }).populate(
+      const { pattern, password, token } = req.body
+      const user = await Users.findOne({
+        $or: [{ email: pattern }, { username: pattern }]
+      }).populate(
         "followers following",
         "avatar username fullname followers following"
       )
 
-      if (!user)
-        return res.status(400).json({ msg: "This email does not exist." })
+      if (!user) {
+        return res
+          .status(400)
+          .json({ msg: "This email or username does not exist." })
+      }
 
       // Check if is verify email
-
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch)
         return res.status(400).json({ msg: "Password is incorrect." })
@@ -98,6 +102,7 @@ const authCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
+
   logout: async (req, res) => {
     try {
       res.clearCookie("refreshtoken", { path: "/api/refresh_token" })
@@ -106,6 +111,7 @@ const authCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
+
   generateAccessToken: async (req, res) => {
     try {
       const rf_token = req.cookies.refreshtoken
