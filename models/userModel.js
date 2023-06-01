@@ -44,7 +44,8 @@ const userSchema = new mongoose.Schema(
     following: [{ type: mongoose.Types.ObjectId, ref: "user" }],
     saved: [{ type: mongoose.Types.ObjectId, ref: "user" }],
     otpEnabled: { type: Boolean, required: true, default: false },
-    otpInfo: { type: Object, required: true, default: {} }
+    otpInfo: { type: Object, required: true, default: {} },
+    isVerify: { type: Boolean, required: true, default: false }
   },
   {
     timestamps: true

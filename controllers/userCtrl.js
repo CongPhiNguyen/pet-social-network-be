@@ -47,18 +47,26 @@ const userCtrl = {
     }
     const user = await Users.findById(id)
     if (!user) {
-      res.status(400).send({ success: false })
+      return res.status(400).send({ success: false })
     }
-    res.status(200).send({ success: true, email: user.email })
+    return res.status(200).send({ success: true, email: user.email })
   },
 
   sendEmailVerify: async (req, res) => {
-    const result = await sendMailNode(
-      "CODE",
-      "code",
-      "congphinguyen312@gmail.com"
-    )
+    const { id } = req.params
+    // Check existed user
+    if (!isObjectId(id)) {
+      return res.status(400).json({ msg: "UserId is not valid" })
+    }
+    const userInfo = await Users.findById(id)
+    if (!userInfo) {
+      return res.status(400).json({ msg: "UserId is not found" })
+    }
+    const email = userInfo.email
+    const resultSendMail = await sendMailNode("CODE", "code", email)
     res.status(200).send({ success: true, result: result })
+
+    return res.status(200).send({ success: true, email: email })
   },
 
   verifyEmail: async (req, res) => {
