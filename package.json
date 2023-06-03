@@ -7,7 +7,7 @@
     "node": "16.16.0"
   },
   "scripts": {
-    "start": "pm2 start ecosystem.config.json --no-daemon",
+    "start": "node server.js --ignore client",
     "start:dev": "nodemon server.js --ignore client",
     "server": "nodemon server.js",
     "client": "cd client && npm run start",
