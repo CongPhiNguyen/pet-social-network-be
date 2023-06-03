@@ -10,6 +10,8 @@ const morgan = require("morgan")
 const Log = require("./models/logsModel")
 const morganBody = require("morgan-body")
 const jwt = require("jsonwebtoken")
+const cluster = require("cluster")
+const cpuCount = require("os").cpus().length
 
 const app = express()
 app.use(express.json())
@@ -51,7 +53,7 @@ app.use(function (req, res, next) {
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
       userId = decoded.id
     }
-  } catch (e) { }
+  } catch (e) {}
   // tạo một document mới cho log
   const log = new Log({
     method: req.method,
@@ -81,6 +83,7 @@ app.use("/api", require("./routes/messageRouter"))
 app.use("/api", require("./routes/petRouter"))
 app.use("/api", require("./routes/logRouter"))
 app.use("/api", require("./routes/gptRouter"))
+app.use("/", require("./routes/errorRouter"))
 
 const URI = process.env.MONGODB_URL
 mongoose.connect(
@@ -105,6 +108,16 @@ mongoose.connect(
 // }
 
 const port = process.env.PORT || 5000
-http.listen(port, () => {
-  console.log("Server is running on port", port)
-})
+if (cluster.isMaster) {
+  for (var i = 0; i < cpuCount; i++) {
+    cluster.fork()
+  }
+  cluster.on("exit", function (worker, code, signal) {
+    console.log("worker " + worker.process.pid + " died")
+    cluster.fork()
+  })
+} else {
+  app.listen(port, () => {
+    console.log("Server is running at port " + port)
+  })
+}
