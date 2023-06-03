@@ -28,6 +28,7 @@
     "dotenv": "^8.2.0",
     "event-source-polyfill": "^1.0.31",
     "express": "^4.17.1",
+    "forever": "^4.0.3",
     "google-gax": "^3.6.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.13",
