@@ -5,6 +5,8 @@ router.post("/register", authCtrl.register)
 
 router.post("/login", authCtrl.login)
 
+router.post("/login-google", authCtrl.loginGoogle)
+
 router.post("/logout", authCtrl.logout)
 
 router.post("/forgot-password", authCtrl.forgotPassword)

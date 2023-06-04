@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt")
 const { success } = require("concurrently/src/defaults")
 const jwt = require("jsonwebtoken")
 const speakeasy = require("speakeasy")
+const jwt_decode = require("jwt-decode")
 
 const authCtrl = {
   register: async (req, res) => {
@@ -318,6 +319,66 @@ const authCtrl = {
       { password: passwordHash }
     )
     res.status(200).send({ success: true })
+  },
+
+  loginGoogle: async (req, res) => {
+    try {
+      const info = jwt_decode(req?.body?.token)
+      const { email } = info
+
+      // Check if info is defined
+      if (!info) {
+        return res
+          .status(400)
+          .send({ success: false, message: "Unexpected error" })
+      }
+
+      // Check if user exists
+      const user = await Users.findOne({ email: email })
+      if (!user) {
+        const passwordHash = await bcrypt.hash("111111", 12)
+        // Create a new user
+        const userInfo = {
+          fullname: [info?.family_name, info?.given_name].join(" "),
+          username: info?.email.slice(0, 24),
+          email: info?.email,
+          password: passwordHash,
+          avatar: info?.picture,
+          role: "user",
+          gender: "male",
+          story: "",
+          isVerify: true
+        }
+        const saveUser = await new Users(userInfo).save()
+      }
+
+      const userFullInfo = await Users.findOne({
+        email: info?.email
+      })
+        .populate(
+          "followers following",
+          "avatar username fullname followers following"
+        )
+        .lean()
+
+      const access_token = createAccessToken({ id: userFullInfo._id })
+      const refresh_token = createRefreshToken({ id: userFullInfo._id })
+
+      return res.status(200).send({
+        msg: "Login Success!",
+        access_token,
+        refresh_token,
+        user: {
+          ...userFullInfo,
+          password: ""
+        }
+      })
+    } catch (err) {
+      console.log(err.message)
+      return res
+        .status(500)
+        .send({ success: false, message: "Internal server error" })
+    }
   }
 }
 
