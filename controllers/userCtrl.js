@@ -53,6 +53,40 @@ const userCtrl = {
     return res.status(200).send({ success: true, email: user.email })
   },
 
+  sendEmailVerifyByPattern: async (req, res) => {
+    const { pattern } = req.params
+    const userFind = await Users.findOne({
+      $or: [{ username: pattern }, { email: pattern }]
+    })
+    if (!userFind) {
+      res
+        .status(400)
+        .send({ success: false, message: "Username or email not found" })
+      return
+    }
+    // Update code in user
+    // const code = renderCode(6)
+    const code = "123456"
+    const currentTime = Date.now()
+
+    await Users.findOneAndUpdate(
+      { $or: [{ username: pattern }, { email: pattern }] },
+      {
+        codeVerify: code,
+        timeSendCode: currentTime
+      }
+    )
+
+    // const email = userFind.email
+    // await sendMailNode(
+    //   "PET LOVE CODE VERIFICATION",
+    //   `Your verfication code of Petlove is: ${code}`,
+    //   email
+    // )
+
+    return res.status(200).send({ success: true })
+  },
+
   sendEmailVerify: async (req, res) => {
     const { id } = req.params
     // Check existed user

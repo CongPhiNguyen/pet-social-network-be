@@ -1,5 +1,6 @@
 const Users = require("../models/userModel")
 const bcrypt = require("bcrypt")
+const { success } = require("concurrently/src/defaults")
 const jwt = require("jsonwebtoken")
 const speakeasy = require("speakeasy")
 
@@ -267,34 +268,56 @@ const authCtrl = {
     res.status(200).send({ success: true, updateUser: updateUser })
   },
   forgotPassword: async (req, res) => {
-    const { email, token } = req.body
-    // find email
-    const userFind = await Users.findOne({ email: email })
+    const { pattern, code } = req.body
+
+    const userFind = await Users.findOne({
+      $or: [{ username: pattern }, { email: pattern }]
+    })
     if (!userFind) {
       res
         .status(400)
-        .send({ success: false, message: `Email "${email}" not existed` })
+        .send({ success: false, message: "Username or email not found" })
       return
     }
-    // verify token
-    const verified = speakeasy.totp.verify({
-      secret: userFind?.otpInfo?.otp_base32,
-      encoding: "base32",
-      token: token
-    })
 
-    if (!verified) {
-      return res.status(401).json({
-        status: "fail",
-        message: "Token is not valid"
-      })
+    if (userFind.codeVerify !== code) {
+      res
+        .status(400)
+        .send({ success: false, message: "Verify code is not valid" })
+      return
+    }
+    // Check time:
+    const timeCreateCode = userFind.timeSendCode
+    const timeNow = Date.now()
+    const timeDiff = (timeNow - timeCreateCode.getTime()) / 1000
+    if (timeDiff > 120) {
+      return res.status(400).send({ success: false, message: "Code expired!" })
     }
 
-    res.status(200).send({
-      success: true,
-      email: email,
-      secret: userFind?.otpInfo?.otp_base32
+    return res.status(200).send({ success: true })
+  },
+  changePassword: async (req, res) => {
+    console.log(req.body)
+    const { pattern, password } = req.body
+    // Find user
+    const userFind = await Users.findOne({
+      $or: [{ username: pattern }, { email: pattern }]
     })
+    if (!userFind) {
+      res
+        .status(400)
+        .send({ success: false, message: "Username or email not found" })
+      return
+    }
+    // Update password
+    const passwordHash = await bcrypt.hash(password, 12)
+    await Users.findOneAndUpdate(
+      {
+        $or: [{ username: pattern }, { email: pattern }]
+      },
+      { password: passwordHash }
+    )
+    res.status(200).send({ success: true })
   }
 }
 

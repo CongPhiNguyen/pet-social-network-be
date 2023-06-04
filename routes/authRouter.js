@@ -9,6 +9,8 @@ router.post("/logout", authCtrl.logout)
 
 router.post("/forgot-password", authCtrl.forgotPassword)
 
+router.post("/change-password", authCtrl.changePassword)
+
 router.post("/refresh_token", authCtrl.generateAccessToken)
 
 router.get("/refresh-v2", authCtrl.generateAccessTokenV2)
