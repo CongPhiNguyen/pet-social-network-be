@@ -53,7 +53,7 @@ app.use(function (req, res, next) {
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
       userId = decoded.id
     }
-  } catch (e) {}
+  } catch (e) { }
   // tạo một document mới cho log
   const log = new Log({
     method: req.method,
