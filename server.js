@@ -66,7 +66,7 @@ app.use(function (req, res, next) {
   // lưu document vào MongoDB
   log.save(function (err) {
     if (err) {
-      console.log(err)
+      console.log(err.msg)
     }
   })
 

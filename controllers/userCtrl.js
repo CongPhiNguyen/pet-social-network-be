@@ -1,3 +1,4 @@
+const renderCode = require("../helpers/renderCode")
 const sendMailNode = require("../helpers/sendMail")
 const { isObjectId } = require("../helpers/stringValidation")
 const Users = require("../models/userModel")
@@ -62,18 +63,34 @@ const userCtrl = {
     if (!userInfo) {
       return res.status(400).json({ msg: "UserId is not found" })
     }
-    const email = userInfo.email
-    const resultSendMail = await sendMailNode("CODE", "code", email)
-    res.status(200).send({ success: true, result: result })
 
-    return res.status(200).send({ success: true, email: email })
+    // Update code in user
+    // const code = renderCode(6)
+    const code = "123456"
+    const currentTime = Date.now()
+
+    await Users.findByIdAndUpdate(id, {
+      codeVerify: code,
+      timeSendCode: currentTime
+    })
+
+    // const email = userInfo.email
+    // await sendMailNode(
+    //   "PET LOVE CODE VERIFICATION",
+    //   `Your verfication code of Petlove is: ${code}`,
+    //   email
+    // )
+
+    return res.status(200).send({ success: true })
   },
 
   verifyEmail: async (req, res) => {
+    console.log("HIHI")
     console.log(req.params)
     console.log(req.body)
     res.status(200).send({ success: true })
   },
+
   follow: async (req, res) => {
     try {
       const user = await Users.find({

@@ -49,7 +49,7 @@ class gptCtrl {
           }
         })
       } catch (error) {
-        console.error("Error:", error)
+        console.error("Error:", error.message)
         res.end()
       }
     }
