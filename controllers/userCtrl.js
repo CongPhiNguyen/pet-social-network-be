@@ -85,10 +85,41 @@ const userCtrl = {
   },
 
   verifyEmail: async (req, res) => {
-    console.log("HIHI")
-    console.log(req.params)
-    console.log(req.body)
-    res.status(200).send({ success: true })
+    const { email, code } = req.body
+    const userVerify = await Users.findOne({
+      email: email,
+      codeVerify: code
+    })
+
+    if (!userVerify) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Verification code not valid" })
+    }
+
+    // Check time:
+    const timeCreateCode = userVerify.timeSendCode
+    const timeNow = Date.now()
+    const timeDiff = (timeNow - timeCreateCode.getTime()) / 1000
+    if (timeDiff > 120) {
+      return res.status(400).send({ success: false, message: "Code expired!" })
+    }
+
+    const findUserUpdate = await Users.findOneAndUpdate(
+      {
+        email: email,
+        codeVerify: code
+      },
+      { isVerify: true },
+      { new: true }
+    )
+    if (!findUserUpdate) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Error when updating verify status" })
+    } else {
+      return res.status(200).send({ success: true })
+    }
   },
 
   follow: async (req, res) => {
