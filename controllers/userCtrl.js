@@ -245,8 +245,32 @@ const userCtrl = {
     }
   },
   getAllUser: async (req, res) => {
-    const users = await Users.find({})
+    const { id, username, role } = req.query
+    const objectSearch = {};
+    if (id && id !== 'undefined') objectSearch['idString'] = new RegExp(id);
+    if (username && username !== 'undefined') objectSearch['username'] = new RegExp(username);
+    if (role && role !== 'undefined') objectSearch['role'] = new RegExp(role);
+
+    const users = await Users.aggregate([
+      {
+        $addFields: {
+          idString: { $toString: '$_id' },
+        },
+      },
+      {
+        $match: {
+          ...objectSearch,
+        },
+      },
+    ])
     res.status(200).send(users)
+  },
+
+  changeRole: async (req, res) => {
+    const { id, role } = req.body
+    console.log(req.body)
+    const user = await Users.findByIdAndUpdate(id, { role })
+    res.status(200).send(user)
   },
 
   getAllFollower: async (req, res) => {

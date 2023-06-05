@@ -17,6 +17,8 @@ router.patch("/user/:id/unfollow", auth, userCtrl.unfollow)
 router.get("/user", userCtrl.getUserWithEmail)
 router.get("user", userCtrl.getUserWithEmail)
 
+
+router.post("/change-role", userCtrl.changeRole)
 router.get("/suggestionsUser", auth, userCtrl.suggestionsUser)
 router.get("/get-all-user", userCtrl.getAllUser)
 router.get("/follower/:id", userCtrl.getAllFollower)
