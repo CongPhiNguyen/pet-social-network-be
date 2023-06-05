@@ -117,7 +117,7 @@ if (cluster.isMaster) {
     cluster.fork()
   })
 } else {
-  app.listen(port, () => {
+  http.listen(port, () => {
     console.log("Server is running at port " + port)
   })
 }
