@@ -10,7 +10,16 @@ const EditData = (data, id, call) => {
 const SocketServer = (socket) => {
     // Connect - Disconnect
     socket.on('joinUser', user => {
-        users.push({ id: user._id, socketId: socket.id, followers: user.followers })
+        users.push({ id: user._id, socketId: socket.id, followers: user.followers, fullname: user.fullname, email: user.email, role: user.role })
+        const admins = users.filter(user => user.role === 'admin')
+
+        admins.forEach(user => {
+            socket.to(user.socketId).emit("getList", users)
+        })
+    })
+
+    socket.on('listUserOnline', () => {
+        socket.emit("getList", users)
     })
 
     socket.on('disconnect', () => {
@@ -36,8 +45,11 @@ const SocketServer = (socket) => {
         }
 
         users = users.filter(user => user.socketId !== socket.id)
+        const admins = users.filter(user => user.role === 'admin')
+        admins.forEach(user => {
+            socket.to(user.socketId).emit("getList", users)
+        })
     })
-
 
     // Likes
     socket.on('likePost', newPost => {
