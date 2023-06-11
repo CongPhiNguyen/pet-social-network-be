@@ -1,10 +1,12 @@
 const Conversations = require("../models/conversationModel")
 const Messages = require("../models/messageModel")
-// const dialogflow = require("dialogflow")
-// const uuid = require("uuid")
-// const sessionClient = new dialogflow.SessionsClient()
-// const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
-// require("dotenv").config({ path: "./.env" })
+const dialogflow = require("dialogflow")
+const uuid = require("uuid")
+const sessionClient = new dialogflow.SessionsClient()
+const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
+require("dotenv").config({ path: "./.env" })
+const Chat = require("../models/chatModel")
+
 class APIfeatures {
   constructor(query, queryString) {
     this.query = query
@@ -113,6 +115,7 @@ const messageCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
+
   deleteConversation: async (req, res) => {
     try {
       const newConver = await Conversations.findOneAndDelete({
@@ -128,12 +131,40 @@ const messageCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
+
   dialogFlowApi: async (req, res) => {
+    const { userId, message } = req.body
+    let userChat = await Chat.findOne({ userId: userId, bot: "dialogflow" })
+    // Check case chưa nhắn lần nào
+    if (!userChat) {
+      const userChatInfo = {
+        userId: userId,
+        session: sessionPath,
+        message: [],
+        bot: "dialogflow"
+      }
+      await new Chat(userChatInfo).save()
+    }
+
+    userChat = await Chat.findOne({ userId: userId, bot: "dialogflow" })
+
+    // Append user message
+    const messageList = userChat.message
+    messageList.push({
+      text: message,
+      time: Date.now(),
+      sender: userId
+    })
+    await Chat.findOneAndUpdate(
+      { userId: userId, sessionPath: sessionPath, bot: "dialogflow" },
+      { message: messageList }
+    )
+
     const request = {
       session: sessionPath,
       queryInput: {
         text: {
-          text: req.body.message,
+          text: message,
           languageCode: "en-US"
         }
       }
@@ -142,11 +173,33 @@ const messageCtrl = {
     try {
       const responses = await sessionClient.detectIntent(request)
       const result = responses[0].queryResult
+      messageList.push({
+        // ...responses,
+        text: responses[0].queryResult.fulfillmentText,
+        time: Date.now(),
+        sender: "dialogflow"
+      })
+      await Chat.findOneAndUpdate(
+        {
+          userId: userId,
+          sessionPath: userChat.sessionPath,
+          bot: "dialogflow"
+        },
+        { message: messageList }
+      )
       res.status(200).send({ message: result.fulfillmentText })
     } catch (error) {
       console.log(`Error in detectIntent: ${error}`)
       res.status(500).send("Internal Server Error")
     }
+  },
+
+  getBotMessage: async (req, res) => {
+    const { botName, userId } = req.query
+    const userChat = await Chat.findOne({ bot: botName, userId: userId })
+    res
+      .status(200)
+      .send({ success: false, messageList: userChat?.message || [] })
   }
 }
 

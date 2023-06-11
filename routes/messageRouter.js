@@ -14,4 +14,6 @@ router.delete("/conversation/:id", auth, messageCtrl.deleteConversation)
 
 router.post("/dialogflow-api", messageCtrl.dialogFlowApi)
 
+router.get("/bot-message", messageCtrl.getBotMessage)
+
 module.exports = router
