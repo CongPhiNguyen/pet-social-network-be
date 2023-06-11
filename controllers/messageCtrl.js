@@ -197,7 +197,7 @@ const messageCtrl = {
   getBotMessage: async (req, res) => {
     const { botName, userId } = req.query
     const userChat = await Chat.findOne({ bot: botName, userId: userId })
-    res
+    return res
       .status(200)
       .send({ success: false, messageList: userChat?.message || [] })
   }
