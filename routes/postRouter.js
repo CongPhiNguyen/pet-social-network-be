@@ -2,6 +2,8 @@ const router = require("express").Router()
 const postCtrl = require("../controllers/postCtrl")
 const auth = require("../middleware/auth")
 
+router.get("/get-all-posts", postCtrl.getAllPosts)
+
 router
   .route("/posts")
   .post(auth, postCtrl.createPost)
