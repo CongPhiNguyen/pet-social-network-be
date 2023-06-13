@@ -18,8 +18,42 @@ class APIfeatures {
   }
 }
 
+function convertToUnaccentedString(str) {
+  // Chuẩn hóa chuỗi Unicode để xử lý các ký tự có dấu
+  const normalizedString = str.normalize('NFD');
+
+  // Sử dụng regular expression để loại bỏ các ký tự không phải là chữ cái Latin
+  const unaccentedString = normalizedString.replace(/[\u0300-\u036f]/g, '');
+
+  // Chuyển đổi thành chữ thường
+  const lowercaseString = unaccentedString.toLowerCase();
+
+  return lowercaseString;
+}
+let LimitsWord = ['Fucking', 'dm', 'dcmm']
+
+function KiemTraTuNguThoTuc(content, res) {
+  const content1 = convertToUnaccentedString(content)
+  for (const word of LimitsWord) {
+    if (content1.includes(convertToUnaccentedString(word))) {
+      return res.status(400).json({ msg: "Content contains no offensive words" })
+    }
+  }
+}
+
+
 
 const postCtrl = {
+  getAllLimitsWord: async (req, res) => {
+    res.status(200).send({ data: LimitsWord })
+  },
+
+  updateAllLimitsWord: async (req, res) => {
+    const { words } = req.body
+    LimitsWord = words
+    res.status(200).send({ data: LimitsWord })
+  },
+
   getAllPosts: async (req, res) => {
     try {
       const { username } = req.query
@@ -70,6 +104,7 @@ const postCtrl = {
   createPost: async (req, res) => {
     try {
       const { content, images, location } = req.body
+      KiemTraTuNguThoTuc(content, res)
       if (images.length === 0)
         return res.status(400).json({ msg: "Please add your photo." })
 
@@ -119,6 +154,7 @@ const postCtrl = {
   updatePost: async (req, res) => {
     try {
       const { content, images, location } = req.body
+      KiemTraTuNguThoTuc(content, res)
 
       const post = await Posts.findOneAndUpdate(
         { _id: req.params.id },
@@ -343,4 +379,4 @@ const postCtrl = {
   }
 }
 
-module.exports = postCtrl
+module.exports = { postCtrl, KiemTraTuNguThoTuc }
