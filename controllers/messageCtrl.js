@@ -2,6 +2,7 @@ const Conversations = require("../models/conversationModel")
 const Messages = require("../models/messageModel")
 const dialogflow = require("dialogflow")
 const uuid = require("uuid")
+const axios = require("axios")
 const sessionClient = new dialogflow.SessionsClient()
 const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
 require("dotenv").config({ path: "./.env" })
@@ -192,6 +193,58 @@ const messageCtrl = {
       console.log(`Error in detectIntent: ${error}`)
       res.status(500).send("Internal Server Error")
     }
+  },
+
+  dummyBotApi: async (req, res) => {
+    const { userId, message } = req.body
+    let userChat = await Chat.findOne({ userId: userId, bot: "dummy" })
+    // Check case chưa nhắn lần nào
+    if (!userChat) {
+      const userChatInfo = {
+        userId: userId,
+        message: [],
+        bot: "dummy"
+      }
+      await new Chat(userChatInfo).save()
+    }
+    userChat = await Chat.findOne({ userId: userId, bot: "dummy" })
+    // Append user message
+    const messageList = userChat.message
+    messageList.push({
+      text: message,
+      time: Date.now(),
+      sender: userId
+    })
+    await Chat.findOneAndUpdate(
+      { userId: userId, sessionPath: sessionPath, bot: "dialogflow" },
+      { message: messageList }
+    )
+    try {
+      const response = await axios.post(
+        `${process.env.CHAT_BOT_SERVER}/api/chat-basic`,
+        { message: "Đi ngủ chơi" }
+      )
+      const { status, data } = response
+      const result = data.reply
+      messageList.push({
+        // ...responses,
+        text: data.reply,
+        time: Date.now(),
+        sender: "dummy"
+      })
+      await Chat.findOneAndUpdate(
+        {
+          userId: userId,
+          bot: "dummy"
+        },
+        { message: messageList }
+      )
+      res.status(200).send({ message: data.reply })
+    } catch (error) {
+      console.log(`${error}`)
+      res.status(500).send("Internal Server Error")
+    }
+    // res.status(200).send({ success: true, reply: data.reply })
   },
 
   getBotMessage: async (req, res) => {
