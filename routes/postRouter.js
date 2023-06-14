@@ -1,6 +1,10 @@
 const router = require("express").Router()
-const postCtrl = require("../controllers/postCtrl")
+const { postCtrl } = require("../controllers/postCtrl")
 const auth = require("../middleware/auth")
+
+router.get("/get-all-posts", postCtrl.getAllPosts)
+router.get("/get-all-limits-word", postCtrl.getAllLimitsWord)
+router.post("/get-all-limits-word", postCtrl.updateAllLimitsWord)
 
 router
   .route("/posts")
