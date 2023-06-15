@@ -3,6 +3,8 @@ const Messages = require("../models/messageModel")
 const dialogflow = require("dialogflow")
 const uuid = require("uuid")
 const axios = require("axios")
+const fs = require("fs")
+const moment = require("moment")
 const sessionClient = new dialogflow.SessionsClient()
 const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
 require("dotenv").config({ path: "./.env" })
@@ -173,6 +175,13 @@ const messageCtrl = {
 
     try {
       const responses = await sessionClient.detectIntent(request)
+
+      fs.writeFileSync(
+        `C:\\CongPhi\\school-project\\final\\pet-social-network-be\\logs\\a_${moment().format(
+          "DDMMYY_HHmmss"
+        )}.json`,
+        JSON.stringify(responses)
+      )
       const result = responses[0].queryResult
       messageList.push({
         // ...responses,

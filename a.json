@@ -1,0 +1,68 @@
+[
+  {
+    "responseId": "27cae7f4-3818-4411-93a1-6c8bf27923f3-a4910cec",
+    "queryResult": {
+      "fulfillmentMessages": [
+        {
+          "platform": "PLATFORM_UNSPECIFIED",
+          "text": { "text": ["Tôi chưa hiểu. Bạn có thể nói lại không?"] },
+          "message": "text"
+        }
+      ],
+      "outputContexts": [
+        {
+          "name": "projects/test-vepy/agent/sessions/205813aa-711d-434b-b07a-c97d2d080904/contexts/__system_counters__",
+          "lifespanCount": 1,
+          "parameters": {
+            "fields": {
+              "no-match": { "numberValue": 1, "kind": "numberValue" },
+              "no-input": { "numberValue": 0, "kind": "numberValue" }
+            }
+          }
+        }
+      ],
+      "queryText": "cứu",
+      "speechRecognitionConfidence": 0,
+      "action": "input.unknown",
+      "parameters": { "fields": {} },
+      "allRequiredParamsPresent": true,
+      "fulfillmentText": "Tôi chưa hiểu. Bạn có thể nói lại không?",
+      "webhookSource": "",
+      "webhookPayload": null,
+      "intent": {
+        "inputContextNames": [],
+        "events": [],
+        "trainingPhrases": [],
+        "outputContexts": [],
+        "parameters": [],
+        "messages": [],
+        "defaultResponsePlatforms": [],
+        "followupIntentInfo": [],
+        "name": "projects/test-vepy/agent/intents/2fac4a61-e1d9-4ab9-8633-7ac15a2bf85e",
+        "displayName": "Default Fallback Intent",
+        "priority": 0,
+        "isFallback": true,
+        "webhookState": "WEBHOOK_STATE_UNSPECIFIED",
+        "action": "",
+        "resetContexts": false,
+        "rootFollowupIntentName": "",
+        "parentFollowupIntentName": "",
+        "mlDisabled": false
+      },
+      "intentDetectionConfidence": 1,
+      "diagnosticInfo": null,
+      "languageCode": "vi",
+      "sentimentAnalysisResult": {
+        "queryTextSentiment": {
+          "score": 0.30000001192092896,
+          "magnitude": 0.30000001192092896
+        }
+      }
+    },
+    "webhookStatus": null,
+    "outputAudio": { "type": "Buffer", "data": [] },
+    "outputAudioConfig": null
+  },
+  null,
+  null
+]
