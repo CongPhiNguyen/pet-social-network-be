@@ -9,6 +9,7 @@ const sessionClient = new dialogflow.SessionsClient()
 const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
 require("dotenv").config({ path: "./.env" })
 const Chat = require("../models/chatModel")
+const { handleIntent } = require("../helpers/chatBotHandler")
 
 class APIfeatures {
   constructor(query, queryString) {
@@ -176,19 +177,30 @@ const messageCtrl = {
     try {
       const responses = await sessionClient.detectIntent(request)
 
-      fs.writeFileSync(
-        `C:\\CongPhi\\school-project\\final\\pet-social-network-be\\logs\\a_${moment().format(
-          "DDMMYY_HHmmss"
-        )}.json`,
-        JSON.stringify(responses)
-      )
+      const { queryResult } = responses[0]
+      const dialogFlowFeature = await handleIntent(queryResult)
+
+      // Temporary disable logs
+      try {
+        fs.writeFileSync(
+          `C:\\CongPhi\\school-project\\logs\\a_${moment().format(
+            "DDMMYY_HHmmss"
+          )}.json`,
+          JSON.stringify(responses)
+        )
+      } catch (err) {
+        console.log(err)
+      }
+
       const result = responses[0].queryResult
-      messageList.push({
+      const messageInfo = {
         // ...responses,
         text: responses[0].queryResult.fulfillmentText,
+        dialogflowFeature: dialogFlowFeature,
         time: Date.now(),
         sender: "dialogflow"
-      })
+      }
+      messageList.push(messageInfo)
       await Chat.findOneAndUpdate(
         {
           userId: userId,
@@ -197,7 +209,7 @@ const messageCtrl = {
         },
         { message: messageList }
       )
-      res.status(200).send({ message: result.fulfillmentText })
+      res.status(200).send(messageInfo)
     } catch (error) {
       console.log(`Error in detectIntent: ${error}`)
       res.status(500).send("Internal Server Error")
