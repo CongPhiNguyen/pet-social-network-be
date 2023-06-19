@@ -48,6 +48,33 @@ const postCtrl = {
     res.status(200).send({ data: LimitsWord })
   },
 
+  getPostByLocation: async (req, res) => {
+    let { location } = req.body
+    let arrLocation = location.split(",")
+    arrLocation = arrLocation.map(word => word.trim())
+    arrLocation = arrLocation.filter(word => isNaN(word))
+    console.log(arrLocation)
+    // const posts = await Posts.find({ location: { $in: arrLocation } })
+
+    let posts = await Posts.find().populate("user likes", "avatar username fullname followers")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "user likes",
+          select: "-password"
+        }
+      })
+
+    posts = posts.filter(post => {
+      const includesWord = arrLocation.every(word => post.location.includes(word));
+      if (includesWord) return true
+      return false
+
+    })
+
+    res.status(200).send({ data: posts })
+  },
+
   updateAllLimitsWord: async (req, res) => {
     const { words } = req.body
     LimitsWord = words
