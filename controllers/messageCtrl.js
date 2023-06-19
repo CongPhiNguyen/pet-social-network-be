@@ -119,7 +119,6 @@ const messageCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
-
   deleteConversation: async (req, res) => {
     try {
       const newConver = await Conversations.findOneAndDelete({
@@ -135,7 +134,6 @@ const messageCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
-
   dialogFlowApi: async (req, res) => {
     const { userId, message } = req.body
     let userChat = await Chat.findOne({ userId: userId, bot: "dialogflow" })
@@ -215,7 +213,6 @@ const messageCtrl = {
       res.status(500).send("Internal Server Error")
     }
   },
-
   dummyBotApi: async (req, res) => {
     const { userId, message } = req.body
     let userChat = await Chat.findOne({ userId: userId, bot: "dummy" })
@@ -243,7 +240,7 @@ const messageCtrl = {
     try {
       const response = await axios.post(
         `${process.env.CHAT_BOT_SERVER}/api/chat-basic`,
-        { message: "Đi ngủ chơi" }
+        { message: message }
       )
       const { status, data } = response
       const result = data.reply
@@ -267,7 +264,56 @@ const messageCtrl = {
     }
     // res.status(200).send({ success: true, reply: data.reply })
   },
-
+  gossipBotApi: async (req, res) => {
+    const { userId, message } = req.body
+    let userChat = await Chat.findOne({ userId: userId, bot: "gossip" })
+    // Check case chưa nhắn lần nào
+    if (!userChat) {
+      const userChatInfo = {
+        userId: userId,
+        message: [],
+        bot: "gossip"
+      }
+      await new Chat(userChatInfo).save()
+    }
+    userChat = await Chat.findOne({ userId: userId, bot: "gossip" })
+    // Append user message
+    const messageList = userChat.message
+    messageList.push({
+      text: message,
+      time: Date.now(),
+      sender: userId
+    })
+    await Chat.findOneAndUpdate(
+      { userId: userId, sessionPath: sessionPath, bot: "gossip" },
+      { message: messageList }
+    )
+    try {
+      const response = await axios.post(
+        `${process.env.CHAT_BOT_SERVER}/api/chat-gossip`,
+        { message: message }
+      )
+      const { status, data } = response
+      const result = data.reply
+      messageList.push({
+        // ...responses,
+        text: data.reply,
+        time: Date.now(),
+        sender: "gossip"
+      })
+      await Chat.findOneAndUpdate(
+        {
+          userId: userId,
+          bot: "gossip"
+        },
+        { message: messageList }
+      )
+      res.status(200).send({ message: data.reply })
+    } catch (error) {
+      console.log(`${error}`)
+      res.status(500).send("Internal Server Error")
+    }
+  },
   getBotMessage: async (req, res) => {
     const { botName, userId } = req.query
     const userChat = await Chat.findOne({ bot: botName, userId: userId })

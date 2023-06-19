@@ -16,6 +16,8 @@ router.post("/dialogflow-api", messageCtrl.dialogFlowApi)
 
 router.post("/chat/dummy", messageCtrl.dummyBotApi)
 
+router.post("/chat/gossip", messageCtrl.gossipBotApi)
+
 router.get("/bot-message", messageCtrl.getBotMessage)
 
 module.exports = router
