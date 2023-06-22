@@ -47,11 +47,25 @@ const handleIntent = async (queryResult) => {
       // )
 
       const catInfo = breeds.find((val) => val.name === catName)
-
       return {
         name: "ask_find-cat",
         catInfo: catInfo,
         catName: catName
+      }
+    }
+    switch (queryResult?.intent?.displayName) {
+      case "ask_pet-fact":
+        return {
+          name: "ask_pet-fact",
+          fact:
+            global.fact[Math.floor(Math.random() * global.fact.length)] || ""
+        }
+      case "ask_pet-care-tips":
+        return {
+          name: "ask_pet-care-tips",
+          tip: global.tips[Math.floor(Math.random() * global.tips.length)] || ""
+        }
+      default: {
       }
     }
   }

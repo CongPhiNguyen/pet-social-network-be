@@ -9,6 +9,7 @@ const sessionClient = new dialogflow.SessionsClient()
 const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
 require("dotenv").config({ path: "./.env" })
 const Chat = require("../models/chatModel")
+const Fact = require("../models/factModel")
 const { handleIntent } = require("../helpers/chatBotHandler")
 
 class APIfeatures {
@@ -294,13 +295,17 @@ const messageCtrl = {
         { message: message }
       )
       const { status, data } = response
+      console.log(data)
       const result = data.reply
-      messageList.push({
+      const messageInfo = {
         // ...responses,
         text: data.reply,
+        message: data.reply,
+        dialogflowFeature: data.dialogflowFeature,
         time: Date.now(),
         sender: "gossip"
-      })
+      }
+      messageList.push(messageInfo)
       await Chat.findOneAndUpdate(
         {
           userId: userId,
@@ -308,7 +313,7 @@ const messageCtrl = {
         },
         { message: messageList }
       )
-      res.status(200).send({ message: data.reply })
+      res.status(200).send(messageInfo)
     } catch (error) {
       console.log(`${error}`)
       res.status(500).send("Internal Server Error")
@@ -320,6 +325,14 @@ const messageCtrl = {
     return res
       .status(200)
       .send({ success: false, messageList: userChat?.message || [] })
+  },
+  getFact: async (req, res) => {
+    console.log("addd")
+    const val = await Fact.find({})
+    res.status(200).send({
+      success: true,
+      fact: global.fact[Math.floor(Math.random() * global.fact.length)]
+    })
   }
 }
 

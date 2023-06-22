@@ -20,4 +20,6 @@ router.post("/chat/gossip", messageCtrl.gossipBotApi)
 
 router.get("/bot-message", messageCtrl.getBotMessage)
 
+router.get("/get-fact", messageCtrl.getFact)
+
 module.exports = router

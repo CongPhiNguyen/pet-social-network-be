@@ -53,7 +53,7 @@ app.use(function (req, res, next) {
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
       userId = decoded.id
     }
-  } catch (e) { }
+  } catch (e) {}
   // tạo một document mới cho log
   const log = new Log({
     method: req.method,
@@ -106,6 +106,17 @@ mongoose.connect(
 //     res.sendFile(path.join(__dirname, "client", "build", "index.html"))
 //   })
 // }
+
+const main = async () => {
+  global.fact = await require("fs")
+    .readFileSync("./fact.txt", "utf-8")
+    .split("\r\n")
+  global.tips = await require("fs")
+    .readFileSync("./tips.txt", "utf-8")
+    .split("\r\n")
+}
+
+main()
 
 const port = process.env.PORT || 5000
 if (cluster.isMaster) {
