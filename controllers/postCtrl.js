@@ -32,13 +32,14 @@ function convertToUnaccentedString(str) {
 }
 let LimitsWord = ['Fucking', 'dm', 'dcmm']
 
-function KiemTraTuNguThoTuc(content, res) {
+function KiemTraTuNguThoTuc(content) {
   const content1 = convertToUnaccentedString(content)
   for (const word of LimitsWord) {
     if (content1.includes(convertToUnaccentedString(word))) {
-      return res.status(400).json({ msg: "Content contains no offensive words" })
+      return true
     }
   }
+  return false
 }
 
 
@@ -131,7 +132,10 @@ const postCtrl = {
   createPost: async (req, res) => {
     try {
       const { content, images, location } = req.body
-      KiemTraTuNguThoTuc(content, res)
+      const check = KiemTraTuNguThoTuc(content)
+      if (check)
+        return res.status(400).json({ msg: "Content contains no offensive words" })
+
       if (images.length === 0)
         return res.status(400).json({ msg: "Please add your photo." })
 
@@ -181,7 +185,9 @@ const postCtrl = {
   updatePost: async (req, res) => {
     try {
       const { content, images, location } = req.body
-      KiemTraTuNguThoTuc(content, res)
+      const check = KiemTraTuNguThoTuc(content)
+      if (check)
+        return res.status(400).json({ msg: "Content contains no offensive words" })
 
       const post = await Posts.findOneAndUpdate(
         { _id: req.params.id },
