@@ -32,13 +32,14 @@ function convertToUnaccentedString(str) {
 }
 let LimitsWord = ['Fucking', 'dm', 'dcmm']
 
-function KiemTraTuNguThoTuc(content, res) {
+function KiemTraTuNguThoTuc(content) {
   const content1 = convertToUnaccentedString(content)
   for (const word of LimitsWord) {
     if (content1.includes(convertToUnaccentedString(word))) {
-      return res.status(400).json({ msg: "Content contains no offensive words" })
+      return true
     }
   }
+  return false
 }
 
 
@@ -46,6 +47,33 @@ function KiemTraTuNguThoTuc(content, res) {
 const postCtrl = {
   getAllLimitsWord: async (req, res) => {
     res.status(200).send({ data: LimitsWord })
+  },
+
+  getPostByLocation: async (req, res) => {
+    let { location } = req.body
+    let arrLocation = location.split(",")
+    arrLocation = arrLocation.map(word => word.trim())
+    arrLocation = arrLocation.filter(word => isNaN(word))
+    arrLocation = arrLocation.splice(-3)
+    // const posts = await Posts.find({ location: { $in: arrLocation } })
+
+    let posts = await Posts.find().populate("user likes", "avatar username fullname followers")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "user likes",
+          select: "-password"
+        }
+      })
+
+    posts = posts.filter(post => {
+      const includesWord = arrLocation.every(word => post.location.includes(word));
+      if (includesWord) return true
+      return false
+
+    })
+
+    res.status(200).send({ data: posts })
   },
 
   updateAllLimitsWord: async (req, res) => {
@@ -104,7 +132,10 @@ const postCtrl = {
   createPost: async (req, res) => {
     try {
       const { content, images, location } = req.body
-      KiemTraTuNguThoTuc(content, res)
+      const check = KiemTraTuNguThoTuc(content)
+      if (check)
+        return res.status(400).json({ msg: "Content contains no offensive words" })
+
       if (images.length === 0)
         return res.status(400).json({ msg: "Please add your photo." })
 
@@ -154,7 +185,9 @@ const postCtrl = {
   updatePost: async (req, res) => {
     try {
       const { content, images, location } = req.body
-      KiemTraTuNguThoTuc(content, res)
+      const check = KiemTraTuNguThoTuc(content)
+      if (check)
+        return res.status(400).json({ msg: "Content contains no offensive words" })
 
       const post = await Posts.findOneAndUpdate(
         { _id: req.params.id },

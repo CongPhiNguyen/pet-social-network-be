@@ -15,7 +15,11 @@ const cpuCount = require("os").cpus().length
 
 const app = express()
 app.use(express.json())
-app.use(cors({ origin: true }))
+app.use(cors({
+  origin: true,
+  credentials: true,            //access-control-allow-credentials:true
+  optionSuccessStatus: 200
+}))
 app.use(cookieParser())
 
 // Socket

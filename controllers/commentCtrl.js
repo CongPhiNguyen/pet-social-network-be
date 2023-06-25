@@ -6,7 +6,9 @@ const commentCtrl = {
     createComment: async (req, res) => {
         try {
             const { postId, content, tag, reply, postUserId } = req.body
-            KiemTraTuNguThoTuc(content, res)
+            const check = KiemTraTuNguThoTuc(content)
+            if (check)
+                return res.status(400).json({ msg: "Content contains no offensive words" })
             const post = await Posts.findById(postId)
             if (!post) return res.status(400).json({ msg: "This post does not exist." })
 
@@ -34,7 +36,9 @@ const commentCtrl = {
     updateComment: async (req, res) => {
         try {
             const { content } = req.body
-            KiemTraTuNguThoTuc(content, res)
+            const check = KiemTraTuNguThoTuc(content)
+            if (check)
+                return res.status(400).json({ msg: "Content contains no offensive words" })
 
             await Comments.findOneAndUpdate({
                 _id: req.params.id, user: req.user._id
