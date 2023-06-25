@@ -54,7 +54,7 @@ const postCtrl = {
     let arrLocation = location.split(",")
     arrLocation = arrLocation.map(word => word.trim())
     arrLocation = arrLocation.filter(word => isNaN(word))
-    console.log(arrLocation)
+    arrLocation = arrLocation.splice(-3)
     // const posts = await Posts.find({ location: { $in: arrLocation } })
 
     let posts = await Posts.find().populate("user likes", "avatar username fullname followers")
