@@ -9,6 +9,8 @@ const sessionClient = new dialogflow.SessionsClient()
 const sessionPath = sessionClient.sessionPath(process.env.PROJECT_ID, uuid.v4())
 require("dotenv").config({ path: "./.env" })
 const Chat = require("../models/chatModel")
+const Fact = require("../models/factModel")
+const { handleIntent } = require("../helpers/chatBotHandler")
 
 class APIfeatures {
   constructor(query, queryString) {
@@ -118,7 +120,6 @@ const messageCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
-
   deleteConversation: async (req, res) => {
     try {
       const newConver = await Conversations.findOneAndDelete({
@@ -134,7 +135,6 @@ const messageCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
-
   dialogFlowApi: async (req, res) => {
     const { userId, message } = req.body
     let userChat = await Chat.findOne({ userId: userId, bot: "dialogflow" })
@@ -176,19 +176,30 @@ const messageCtrl = {
     try {
       const responses = await sessionClient.detectIntent(request)
 
-      fs.writeFileSync(
-        `C:\\CongPhi\\school-project\\final\\pet-social-network-be\\logs\\a_${moment().format(
-          "DDMMYY_HHmmss"
-        )}.json`,
-        JSON.stringify(responses)
-      )
+      const { queryResult } = responses[0]
+      const dialogFlowFeature = await handleIntent(queryResult)
+
+      // Temporary disable logs
+      try {
+        fs.writeFileSync(
+          `C:\\CongPhi\\school-project\\logs\\a_${moment().format(
+            "DDMMYY_HHmmss"
+          )}.json`,
+          JSON.stringify(responses)
+        )
+      } catch (err) {
+        console.log(err)
+      }
+
       const result = responses[0].queryResult
-      messageList.push({
+      const messageInfo = {
         // ...responses,
         text: responses[0].queryResult.fulfillmentText,
+        dialogflowFeature: dialogFlowFeature,
         time: Date.now(),
         sender: "dialogflow"
-      })
+      }
+      messageList.push(messageInfo)
       await Chat.findOneAndUpdate(
         {
           userId: userId,
@@ -197,13 +208,12 @@ const messageCtrl = {
         },
         { message: messageList }
       )
-      res.status(200).send({ message: result.fulfillmentText })
+      res.status(200).send(messageInfo)
     } catch (error) {
       console.log(`Error in detectIntent: ${error}`)
       res.status(500).send("Internal Server Error")
     }
   },
-
   dummyBotApi: async (req, res) => {
     const { userId, message } = req.body
     let userChat = await Chat.findOne({ userId: userId, bot: "dummy" })
@@ -231,7 +241,7 @@ const messageCtrl = {
     try {
       const response = await axios.post(
         `${process.env.CHAT_BOT_SERVER}/api/chat-basic`,
-        { message: "Đi ngủ chơi" }
+        { message: message }
       )
       const { status, data } = response
       const result = data.reply
@@ -255,13 +265,74 @@ const messageCtrl = {
     }
     // res.status(200).send({ success: true, reply: data.reply })
   },
-
+  gossipBotApi: async (req, res) => {
+    const { userId, message } = req.body
+    let userChat = await Chat.findOne({ userId: userId, bot: "gossip" })
+    // Check case chưa nhắn lần nào
+    if (!userChat) {
+      const userChatInfo = {
+        userId: userId,
+        message: [],
+        bot: "gossip"
+      }
+      await new Chat(userChatInfo).save()
+    }
+    userChat = await Chat.findOne({ userId: userId, bot: "gossip" })
+    // Append user message
+    const messageList = userChat.message
+    messageList.push({
+      text: message,
+      time: Date.now(),
+      sender: userId
+    })
+    await Chat.findOneAndUpdate(
+      { userId: userId, sessionPath: sessionPath, bot: "gossip" },
+      { message: messageList }
+    )
+    try {
+      const response = await axios.post(
+        `${process.env.CHAT_BOT_SERVER}/api/chat-gossip`,
+        { message: message }
+      )
+      const { status, data } = response
+      console.log(data)
+      const result = data.reply
+      const messageInfo = {
+        // ...responses,
+        text: data.reply,
+        message: data.reply,
+        dialogflowFeature: data.dialogflowFeature,
+        time: Date.now(),
+        sender: "gossip"
+      }
+      messageList.push(messageInfo)
+      await Chat.findOneAndUpdate(
+        {
+          userId: userId,
+          bot: "gossip"
+        },
+        { message: messageList }
+      )
+      res.status(200).send(messageInfo)
+    } catch (error) {
+      console.log(`${error}`)
+      res.status(500).send("Internal Server Error")
+    }
+  },
   getBotMessage: async (req, res) => {
     const { botName, userId } = req.query
     const userChat = await Chat.findOne({ bot: botName, userId: userId })
     return res
       .status(200)
       .send({ success: false, messageList: userChat?.message || [] })
+  },
+  getFact: async (req, res) => {
+    console.log("addd")
+    const val = await Fact.find({})
+    res.status(200).send({
+      success: true,
+      fact: global.fact[Math.floor(Math.random() * global.fact.length)]
+    })
   }
 }
 
