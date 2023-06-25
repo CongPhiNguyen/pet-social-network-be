@@ -64,6 +64,15 @@ const authCtrl = {
           .json({ msg: "This email or username does not exist." })
       }
 
+      if (!user.isVerify) {
+        return res
+          .status(401)
+          .json({
+            msg: "Unverified account. Verify account to login",
+            userId: user._id
+          })
+      }
+
       // Check if is verify email
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch)
