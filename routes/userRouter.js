@@ -2,6 +2,8 @@ const router = require("express").Router()
 const auth = require("../middleware/auth")
 const userCtrl = require("../controllers/userCtrl")
 
+
+router.get("/search-in-page", userCtrl.searchInPage)
 router.get("/search", auth, userCtrl.searchUser)
 router.get("/user/:id", auth, userCtrl.getUser)
 router.post("/user/verify-account", userCtrl.verifyEmail)

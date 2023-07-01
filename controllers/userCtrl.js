@@ -2,8 +2,37 @@ const renderCode = require("../helpers/renderCode")
 const sendMailNode = require("../helpers/sendMail")
 const { isObjectId } = require("../helpers/stringValidation")
 const Users = require("../models/userModel")
-
+const Posts = require("../models/postModel")
 const userCtrl = {
+  searchInPage: async (req, res) => {
+    try {
+      const { search } = req.query
+
+      const [users, posts] = await Promise.all([
+        Users.find({
+          username: { $regex: search }
+        }).limit(10)
+          .select("fullname username avatar"),
+        Posts.find({
+          content: { $regex: search }
+        }).sort("-createdAt")
+          .populate("user likes", "avatar username fullname followers")
+          .populate({
+            path: "comments",
+            populate: {
+              path: "user likes",
+              select: "-password"
+            }
+          }).limit(10)
+      ])
+
+
+      res.json({ users, posts })
+    } catch (err) {
+      return res.status(500).json({ msg: err.message })
+    }
+  },
+
   searchUser: async (req, res) => {
     try {
       const users = await Users.find({
