@@ -327,7 +327,6 @@ const messageCtrl = {
       .send({ success: false, messageList: userChat?.message || [] })
   },
   getFact: async (req, res) => {
-    console.log("addd")
     const val = await Fact.find({})
     res.status(200).send({
       success: true,

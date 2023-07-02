@@ -65,12 +65,10 @@ const authCtrl = {
       }
 
       if (!user.isVerify) {
-        return res
-          .status(401)
-          .json({
-            msg: "Unverified account. Verify account to login",
-            userId: user._id
-          })
+        return res.status(401).json({
+          msg: "Unverified account. Verify account to login",
+          userId: user._id
+        })
       }
 
       // Check if is verify email
@@ -170,7 +168,6 @@ const authCtrl = {
         process.env.REFRESH_TOKEN_SECRET,
         async (err, result) => {
           if (err) {
-            console.log(err)
             return res.status(400).json({
               msg: "Please login now.",
               error: "Your token is not valid"
@@ -307,7 +304,6 @@ const authCtrl = {
     return res.status(200).send({ success: true })
   },
   changePassword: async (req, res) => {
-    console.log(req.body)
     const { pattern, password } = req.body
     // Find user
     const userFind = await Users.findOne({
@@ -329,7 +325,6 @@ const authCtrl = {
     )
     res.status(200).send({ success: true })
   },
-
   loginGoogle: async (req, res) => {
     try {
       const info = jwt_decode(req?.body?.token)
