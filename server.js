@@ -12,14 +12,17 @@ const morganBody = require("morgan-body")
 const jwt = require("jsonwebtoken")
 const cluster = require("cluster")
 const cpuCount = require("os").cpus().length
+const { MongoClient } = require("mongodb")
 
 const app = express()
 app.use(express.json())
-app.use(cors({
-  origin: true,
-  credentials: true,            //access-control-allow-credentials:true
-  optionSuccessStatus: 200
-}))
+app.use(
+  cors({
+    origin: true,
+    credentials: true, //access-control-allow-credentials:true
+    optionSuccessStatus: 200
+  })
+)
 app.use(cookieParser())
 
 // Socket
@@ -85,6 +88,7 @@ app.use("/api", require("./routes/commentRouter"))
 app.use("/api", require("./routes/notifyRouter"))
 app.use("/api", require("./routes/messageRouter"))
 app.use("/api", require("./routes/petRouter"))
+app.use("/api", require("./routes/petWikiRouter"))
 app.use("/api", require("./routes/logRouter"))
 app.use("/api", require("./routes/gptRouter"))
 app.use("/", require("./routes/errorRouter"))
@@ -103,6 +107,17 @@ mongoose.connect(
     console.log("Connected to mongodb")
   }
 )
+
+global.mongoClient = new MongoClient(URI, { useUnifiedTopology: true })
+const connectMongoClient = async () => {
+  try {
+    await global.mongoClient.connect()
+    console.log("Connected to the database")
+  } catch (err) {
+    console.log(err)
+  }
+}
+connectMongoClient()
 
 // if (process.env.NODE_ENV === "production") {
 //   app.use(express.static("client/build"))
