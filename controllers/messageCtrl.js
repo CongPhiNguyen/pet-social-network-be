@@ -212,7 +212,10 @@ const messageCtrl = {
           messageRes = newMessage
         } else {
           const dogName = dialogFlowFeature?.dogName
-          let newMessage = messageRes.replace(" ${pet_name}", dogName)
+          let newMessage =
+            messageRes.replace(" ${pet_name}", dogName) +
+            ". Với các tính cách đặc biệt: " +
+            dialogFlowFeature?.tempList
           messageRes = newMessage
         }
       }

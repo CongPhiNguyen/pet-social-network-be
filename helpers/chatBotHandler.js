@@ -89,7 +89,8 @@ const handleIntent = async (queryResult) => {
           )
           return {
             name: "choose.pet-by-personal",
-            dogName: predictDogByTemp(tempList)
+            dogName: predictDogByTemp(tempList),
+            tempList: tempList.join(", ")
           }
         } else {
           const tempList = []

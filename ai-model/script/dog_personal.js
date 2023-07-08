@@ -37,6 +37,7 @@ const genDogPersonalRandom = (num, ignoreList) => {
 }
 
 const predictDogByTemp = (listTemp) => {
+  console.log(listTemp)
   const arr = new Array(tempList.length).fill(0)
   for (const temp of listTemp) {
     if (tempViList.indexOf(temp)) {
