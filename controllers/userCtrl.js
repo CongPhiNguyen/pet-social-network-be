@@ -298,7 +298,6 @@ const userCtrl = {
 
   changeRole: async (req, res) => {
     const { id, role } = req.body
-    console.log(req.body)
     const user = await Users.findByIdAndUpdate(id, { role })
     res.status(200).send(user)
   },
