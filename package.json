@@ -36,6 +36,7 @@
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
     "logger": "^0.0.1",
+    "ml-naivebayes": "^4.0.0",
     "mongoose": "^5.11.13",
     "morgan": "^1.10.0",
     "morgan-body": "^2.6.9",

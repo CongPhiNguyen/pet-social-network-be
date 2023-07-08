@@ -4,6 +4,10 @@ const API_KEY = process.env.CAT_API_KEY
 const axios = require("axios")
 const moment = require("moment")
 const fs = require("fs")
+const {
+  genDogPersonalRandom,
+  predictDogByTemp
+} = require("../ai-model/script/dog_personal")
 
 const handleIntent = async (queryResult) => {
   if (queryResult?.allRequiredParamsPresent) {
@@ -53,20 +57,60 @@ const handleIntent = async (queryResult) => {
         catName: catName
       }
     }
-    switch (queryResult?.intent?.displayName) {
-      case "ask_pet-fact":
-        return {
-          name: "ask_pet-fact",
-          fact:
-            global.fact[Math.floor(Math.random() * global.fact.length)] || ""
-        }
-      case "ask_pet-care-tips":
-        return {
-          name: "ask_pet-care-tips",
-          tip: global.tips[Math.floor(Math.random() * global.tips.length)] || ""
-        }
-      default: {
+  }
+  switch (queryResult?.intent?.displayName) {
+    case "ask_pet-fact":
+      return {
+        name: "ask_pet-fact",
+        fact: global.fact[Math.floor(Math.random() * global.fact.length)] || ""
       }
+    case "ask_pet-care-tips":
+      return {
+        name: "ask_pet-care-tips",
+        tip: global.tips[Math.floor(Math.random() * global.tips.length)] || ""
+      }
+    case "predict_sick":
+      return {
+        name: "predict_sick"
+      }
+    case "choose.pet-by-personal":
+      console.log(queryResult?.parameters?.fields?.pet_type)
+      if (queryResult?.parameters?.fields?.pet_type?.stringValue === "Chó") {
+        if (queryResult?.allRequiredParamsPresent) {
+          const tempList = []
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_1?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_2?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_3?.stringValue
+          )
+          return {
+            name: "choose.pet-by-personal",
+            dogName: predictDogByTemp(tempList)
+          }
+        } else {
+          const tempList = []
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_1?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_2?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_3?.stringValue
+          )
+          const val = genDogPersonalRandom(3, tempList)
+
+          return {
+            name: "choose.pet-by-personal",
+            genPersonal: val
+          }
+        }
+      } else return {}
+    default: {
     }
   }
 }

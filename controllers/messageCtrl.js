@@ -175,26 +175,62 @@ const messageCtrl = {
 
     try {
       const responses = await sessionClient.detectIntent(request)
-
+      let messageRes = responses[0].queryResult.fulfillmentText
       const { queryResult } = responses[0]
       const dialogFlowFeature = await handleIntent(queryResult)
 
-      // Temporary disable logs
-      try {
-        fs.writeFileSync(
-          `C:\\CongPhi\\school-project\\logs\\a_${moment().format(
-            "DDMMYY_HHmmss"
-          )}.json`,
-          JSON.stringify(responses)
-        )
-      } catch (err) {
-        console.log(err)
+      if (dialogFlowFeature?.name === "ask_find-cat") {
+        console.log("ok")
+        const request = {
+          session: sessionPath,
+          queryInput: {
+            text: {
+              text: "Tôi muốn tìm mèo",
+              languageCode: "en-US"
+            }
+          }
+        }
+        await sessionClient.detectIntent(request)
+      } else if (dialogFlowFeature?.name === "ask_find-dog") {
+        const request = {
+          session: sessionPath,
+          queryInput: {
+            text: {
+              text: "Tôi muốn tìm chó",
+              languageCode: "en-US"
+            }
+          }
+        }
+        await sessionClient.detectIntent(request)
+      } else if (dialogFlowFeature?.name === "choose.pet-by-personal") {
+        if (dialogFlowFeature?.genPersonal) {
+          const genPersonal = dialogFlowFeature?.genPersonal
+          let newMessage = messageRes
+            .replace("${per1}", genPersonal[0])
+            .replace("${per2}", genPersonal[1])
+            .replace("${per3}", genPersonal[2])
+          messageRes = newMessage
+        } else {
+          const dogName = dialogFlowFeature?.dogName
+          let newMessage = messageRes.replace(" ${pet_name}", dogName)
+          messageRes = newMessage
+        }
       }
 
-      const result = responses[0].queryResult
+      // // Temporary disable logs
+      // try {
+      //   fs.writeFileSync(
+      //     `C:\\CongPhi\\school-project\\logs\\a_${moment().format(
+      //       "DDMMYY_HHmmss"
+      //     )}.json`,
+      //     JSON.stringify(responses)
+      //   )
+      // } catch (err) {
+      //   console.log(err)
+      // }
       const messageInfo = {
         // ...responses,
-        text: responses[0].queryResult.fulfillmentText,
+        text: messageRes,
         dialogflowFeature: dialogFlowFeature,
         time: Date.now(),
         sender: "dialogflow"

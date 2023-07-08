@@ -13,6 +13,8 @@ const jwt = require("jsonwebtoken")
 const cluster = require("cluster")
 const cpuCount = require("os").cpus().length
 const { MongoClient } = require("mongodb")
+const { MultinomialNB } = require("ml-naivebayes")
+const fs = require("fs")
 
 const app = express()
 app.use(express.json())
@@ -133,6 +135,8 @@ const main = async () => {
   global.tips = await require("fs")
     .readFileSync("./tips.txt", "utf-8")
     .split("\r\n")
+  // load the model
+  // Load the model from a file
 }
 
 main()
