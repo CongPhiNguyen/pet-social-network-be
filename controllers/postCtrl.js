@@ -111,7 +111,7 @@ const postCtrl = {
 
       const features = new APIfeatures(Posts.find({}), objectSearch)
       let posts = await features.query
-        .sort("-createdAt")
+        .sort("-updatedAt")
         .populate("user likes", "avatar username fullname followers")
         .populate({
           path: "comments",
@@ -167,7 +167,7 @@ const postCtrl = {
       }), req.query)
 
       const posts = await features.query
-        .sort("-createdAt")
+        .sort("-updatedAt")
         .populate("user likes", "avatar username fullname followers")
         .populate({
           path: "comments",
@@ -268,7 +268,7 @@ const postCtrl = {
         Posts.find({ user: req.params.id }),
         req.query
       ).paginating()
-      const posts = await features.query.sort("-createdAt")
+      const posts = await features.query.sort("-updatedAt")
 
       res.json({
         posts,
