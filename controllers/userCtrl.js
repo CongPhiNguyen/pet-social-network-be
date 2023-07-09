@@ -364,7 +364,8 @@ const userCtrl = {
     console.log(req.query)
     const { userId } = req.query
     const userIdList = await getRecByUserIdHandling(userId)
-    res.status(200).send({ success: true, suggestion: [userIdList] })
+    // console.log(userIdList)
+    res.status(200).send({ success: true, suggestion: userIdList })
   }
 }
 

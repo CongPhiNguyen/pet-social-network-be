@@ -5,7 +5,7 @@ const getMostFollowUser = (listAllUserRaw, length) => {
 }
 
 // Lấy danh sách theo dõi của người dùng hiện tại
-const getFollowerOfUserId = async (listAllUserRaw) => {
+const getFollowerOfUserId = (listAllUserRaw) => {
   const listAllUser = JSON.parse(listAllUserRaw || "[]") || []
 }
 
@@ -13,6 +13,11 @@ const getFollowingOfUserId = (listAllUserRaw, userId) => {
   const listAllUser = JSON.parse(listAllUserRaw || "[]") || []
   const currentUser = listAllUser.find((user) => user._id === userId)
   return currentUser?.following || []
+}
+
+const getUserInfoById = (listAllUserRaw, userId) => {
+  const listAllUser = JSON.parse(listAllUserRaw || "[]") || []
+  return listAllUser.find((val) => val._id === userId)
 }
 
 const getScore = (listAllUserRaw, listUserId) => {
@@ -42,7 +47,7 @@ const getScore = (listAllUserRaw, listUserId) => {
   return scoreArray
 }
 
-const getRecommendUser = async (listAllUserRaw, userId) => {
+const getRecommendUser = (listAllUserRaw, userId) => {
   const listAllUser = JSON.parse(listAllUserRaw || "[]") || []
   // Check xem phải user chưa từng có tương tác hay không
   // Get thông tin danh sách follow của 1 user
@@ -53,7 +58,12 @@ const getRecommendUser = async (listAllUserRaw, userId) => {
     )
     const recUser = getMostFollowUser(JSON.stringify(listAllUser), 5)
     console.log(recUser.map((val) => val._id))
-    return recUser.map((val) => val._id)
+    return recUser.map((val) => {
+      return {
+        userId: val._id,
+        userInfo: getUserInfoById(JSON.stringify(listAllUser), val._id)
+      }
+    })
   } else {
     console.log(userFollower)
     console.log("User đã follow: ", userFollower.join(","))
@@ -61,7 +71,10 @@ const getRecommendUser = async (listAllUserRaw, userId) => {
     score.sort((a, b) => b.score - a.score)
     const finalUser = score.filter((val) => !userFollower.includes(val.userId))
     console.log("Gợi ý cho người dùng", finalUser)
-    return finalUser.map((val) => val.userId)
+    return finalUser.map((val) => ({
+      ...val,
+      userInfo: getUserInfoById(JSON.stringify(listAllUser), val.userId)
+    }))
   }
 }
 
