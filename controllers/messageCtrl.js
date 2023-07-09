@@ -219,6 +219,20 @@ const messageCtrl = {
             dialogFlowFeature?.tempList
           messageRes = newMessage
         }
+      } else if (dialogFlowFeature?.name === "predict_sick") {
+        if (dialogFlowFeature?.genSick) {
+          const genSick = dialogFlowFeature?.genSick
+          let newMessage = messageRes
+            .replace("${sym1}", genSick[0])
+            .replace("${sym2}", genSick[1])
+            .replace("${sym3}", genSick[2])
+          console.log(newMessage)
+          messageRes = newMessage
+        } else {
+          const sickName = dialogFlowFeature?.sickName
+          let newMessage = messageRes.replace(" ${sick_name}", sickName)
+          messageRes = newMessage
+        }
       }
 
       // // Temporary disable logs

@@ -12,6 +12,7 @@ const {
   predictCatByTemp,
   genCatPersonalRandom
 } = require("../ai-model/script/cat_personal")
+const { predictSickByTemp, genSickRandom } = require("../ai-model/script/sick")
 
 const handleIntent = async (queryResult) => {
   if (queryResult?.allRequiredParamsPresent) {
@@ -62,6 +63,7 @@ const handleIntent = async (queryResult) => {
       }
     }
   }
+  // console.log(queryResult?.intent?.displayName)
   switch (queryResult?.intent?.displayName) {
     case "ask_pet-fact":
       return {
@@ -72,10 +74,6 @@ const handleIntent = async (queryResult) => {
       return {
         name: "ask_pet-care-tips",
         tip: global.tips[Math.floor(Math.random() * global.tips.length)] || ""
-      }
-    case "predict_sick":
-      return {
-        name: "predict_sick"
       }
     case "choose.pet-by-personal":
       console.log(queryResult?.parameters?.fields?.pet_type)
@@ -152,6 +150,31 @@ const handleIntent = async (queryResult) => {
           }
         }
       } else return {}
+    case "predict_sick": {
+      console.log("Alo")
+      if (queryResult?.allRequiredParamsPresent) {
+        const tempList = []
+        tempList.push(queryResult?.parameters?.fields?.symptomp1?.stringValue)
+        tempList.push(queryResult?.parameters?.fields?.symptomp2?.stringValue)
+        tempList.push(queryResult?.parameters?.fields?.symptomp3?.stringValue)
+        return {
+          name: "predict_sick",
+          sickName: predictSickByTemp(tempList),
+          tempList: tempList.join(", ")
+        }
+      } else {
+        const tempList = []
+        tempList.push(queryResult?.parameters?.fields?.symptomp1?.stringValue)
+        tempList.push(queryResult?.parameters?.fields?.symptomp2?.stringValue)
+        tempList.push(queryResult?.parameters?.fields?.symptomp3?.stringValue)
+        const val = genSickRandom(3, tempList)
+        return {
+          name: "predict_sick",
+          genSick: val
+        }
+      }
+    }
+
     default: {
     }
   }
