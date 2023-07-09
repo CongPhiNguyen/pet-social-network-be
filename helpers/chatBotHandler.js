@@ -8,6 +8,10 @@ const {
   genDogPersonalRandom,
   predictDogByTemp
 } = require("../ai-model/script/dog_personal")
+const {
+  predictCatByTemp,
+  genCatPersonalRandom
+} = require("../ai-model/script/cat_personal")
 
 const handleIntent = async (queryResult) => {
   if (queryResult?.allRequiredParamsPresent) {
@@ -104,6 +108,43 @@ const handleIntent = async (queryResult) => {
             queryResult?.parameters?.fields?.pet_personal_3?.stringValue
           )
           const val = genDogPersonalRandom(3, tempList)
+
+          return {
+            name: "choose.pet-by-personal",
+            genPersonal: val
+          }
+        }
+      } else if (
+        queryResult?.parameters?.fields?.pet_type?.stringValue === "Mèo"
+      ) {
+        if (queryResult?.allRequiredParamsPresent) {
+          const tempList = []
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_1?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_2?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_3?.stringValue
+          )
+          return {
+            name: "choose.pet-by-personal",
+            catName: predictCatByTemp(tempList),
+            tempList: tempList.join(", ")
+          }
+        } else {
+          const tempList = []
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_1?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_2?.stringValue
+          )
+          tempList.push(
+            queryResult?.parameters?.fields?.pet_personal_3?.stringValue
+          )
+          const val = genCatPersonalRandom(3, tempList)
 
           return {
             name: "choose.pet-by-personal",

@@ -211,9 +211,10 @@ const messageCtrl = {
             .replace("${per3}", genPersonal[2])
           messageRes = newMessage
         } else {
-          const dogName = dialogFlowFeature?.dogName
+          const petName =
+            dialogFlowFeature?.dogName || dialogFlowFeature?.catName
           let newMessage =
-            messageRes.replace(" ${pet_name}", dogName) +
+            messageRes.replace(" ${pet_name}", petName) +
             ". Với các tính cách đặc biệt: " +
             dialogFlowFeature?.tempList
           messageRes = newMessage
