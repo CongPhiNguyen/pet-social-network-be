@@ -6,7 +6,7 @@ const commentCtrl = {
     createComment: async (req, res) => {
         try {
             const { postId, content, tag, reply, postUserId } = req.body
-            const check = KiemTraTuNguThoTuc(content)
+            const check = await KiemTraTuNguThoTuc(content)
             if (check)
                 return res.status(400).json({ msg: "Content contains no offensive words" })
             const post = await Posts.findById(postId)
@@ -36,7 +36,7 @@ const commentCtrl = {
     updateComment: async (req, res) => {
         try {
             const { content } = req.body
-            const check = KiemTraTuNguThoTuc(content)
+            const check = await KiemTraTuNguThoTuc(content)
             if (check)
                 return res.status(400).json({ msg: "Content contains no offensive words" })
 
