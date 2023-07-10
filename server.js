@@ -44,6 +44,28 @@ ExpressPeerServer(http, { path: "/" })
 app.use(
   morgan(function (tokens, req, res) {
     // trả về một chuỗi JSON chứa thông tin request
+    let userId = ""
+    try {
+      const token = req.header("Authorization")
+      if (token) {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+        userId = decoded.id
+      }
+    } catch (e) {}
+    const log = new Log({
+      method: tokens.method(req, res),
+      url: tokens.url(req, res),
+      status: tokens.status(req, res),
+      responseTime: tokens["response-time"](req, res),
+      userId: userId
+    })
+
+    log.save(function (err) {
+      if (err) {
+        console.log(err.msg)
+      }
+    })
+
     return JSON.stringify({
       method: tokens.method(req, res),
       url: tokens.url(req, res),
@@ -53,34 +75,35 @@ app.use(
   })
 )
 
-// sử dụng middleware để lưu log vào MongoDB
-app.use(function (req, res, next) {
-  let userId = ""
-  try {
-    const token = req.header("Authorization")
-    if (token) {
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-      userId = decoded.id
-    }
-  } catch (e) {}
-  // tạo một document mới cho log
-  const log = new Log({
-    method: req.method,
-    url: req.originalUrl,
-    status: res.statusCode,
-    responseTime: Date.now() - req._startTime,
-    userId: userId
-  })
+// // sử dụng middleware để lưu log vào MongoDB
+// app.use(function (req, res, next) {
+//   let userId = ""
+//   try {
+//     const token = req.header("Authorization")
+//     if (token) {
+//       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+//       userId = decoded.id
+//     }
+//   } catch (e) {}
+//   // tạo một document mới cho log
+//   const log = new Log({
+//     method: req.method,
+//     url: req.originalUrl,
+//     status: res.statusCode,
+//     responseTime: res.responseTime,
+//     userId: userId
+//   })
+//   console.log(log)
 
-  // lưu document vào MongoDB
-  log.save(function (err) {
-    if (err) {
-      console.log(err.msg)
-    }
-  })
+//   // lưu document vào MongoDB
+//   log.save(function (err) {
+//     if (err) {
+//       console.log(err.msg)
+//     }
+//   })
 
-  next()
-})
+//   next()
+// })
 
 // Routes
 app.use("/api", require("./routes/authRouter"))
