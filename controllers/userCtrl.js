@@ -3,6 +3,8 @@ const sendMailNode = require("../helpers/sendMail")
 const { isObjectId } = require("../helpers/stringValidation")
 const Users = require("../models/userModel")
 const Posts = require("../models/postModel")
+const { getRecByUserIdHandling } = require("../helpers/rec_sys")
+
 const userCtrl = {
   searchInPage: async (req, res) => {
     try {
@@ -11,11 +13,13 @@ const userCtrl = {
       const [users, posts] = await Promise.all([
         Users.find({
           username: { $regex: search }
-        }).limit(10)
+        })
+          .limit(10)
           .select("fullname username avatar"),
         Posts.find({
           content: { $regex: search }
-        }).sort("-createdAt")
+        })
+          .sort("-createdAt")
           .populate("user likes", "avatar username fullname followers")
           .populate({
             path: "comments",
@@ -23,9 +27,9 @@ const userCtrl = {
               path: "user likes",
               select: "-password"
             }
-          }).limit(10)
+          })
+          .limit(10)
       ])
-
 
       res.json({ users, posts })
     } catch (err) {
@@ -298,7 +302,6 @@ const userCtrl = {
 
   changeRole: async (req, res) => {
     const { id, role } = req.body
-    console.log(req.body)
     const user = await Users.findByIdAndUpdate(id, { role })
     res.status(200).send(user)
   },
@@ -355,6 +358,13 @@ const userCtrl = {
     } else {
       res.status(400).send({ success: false })
     }
+  },
+  getSuggestion: async (req, res) => {
+    console.log(req.query)
+    const { userId } = req.query
+    const userIdList = await getRecByUserIdHandling(userId)
+    // console.log(userIdList)
+    res.status(200).send({ success: true, suggestion: userIdList })
   }
 }
 

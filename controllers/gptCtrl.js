@@ -27,7 +27,7 @@ class gptCtrl {
           {
             model: "text-davinci-003",
             prompt: message,
-            max_tokens: 500,
+            max_tokens: 1000,
             temperature: 0.9,
             stream: true
           },
@@ -42,6 +42,7 @@ class gptCtrl {
           for (const line of lines) {
             const message = line.replace(/^data: /, "")
             if (message === "[DONE]") {
+              sendEvent('[DONE]')
               return
             }
             const parsed = JSON.parse(message)

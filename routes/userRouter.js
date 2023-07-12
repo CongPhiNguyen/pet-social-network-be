@@ -2,7 +2,6 @@ const router = require("express").Router()
 const auth = require("../middleware/auth")
 const userCtrl = require("../controllers/userCtrl")
 
-
 router.get("/search-in-page", userCtrl.searchInPage)
 router.get("/search", auth, userCtrl.searchUser)
 router.get("/user/:id", auth, userCtrl.getUser)
@@ -18,7 +17,7 @@ router.patch("/user/:id/follow", auth, userCtrl.follow)
 router.patch("/user/:id/unfollow", auth, userCtrl.unfollow)
 router.get("/user", userCtrl.getUserWithEmail)
 router.get("user", userCtrl.getUserWithEmail)
-
+router.get("/user-service/suggest", userCtrl.getSuggestion)
 
 router.post("/change-role", userCtrl.changeRole)
 router.get("/suggestionsUser", auth, userCtrl.suggestionsUser)

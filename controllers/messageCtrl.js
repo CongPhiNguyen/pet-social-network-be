@@ -211,11 +211,26 @@ const messageCtrl = {
             .replace("${per3}", genPersonal[2])
           messageRes = newMessage
         } else {
-          const dogName = dialogFlowFeature?.dogName
+          const petName =
+            dialogFlowFeature?.dogName || dialogFlowFeature?.catName
           let newMessage =
-            messageRes.replace(" ${pet_name}", dogName) +
+            messageRes.replace(" ${pet_name}", petName) +
             ". Với các tính cách đặc biệt: " +
             dialogFlowFeature?.tempList
+          messageRes = newMessage
+        }
+      } else if (dialogFlowFeature?.name === "predict_sick") {
+        if (dialogFlowFeature?.genSick) {
+          const genSick = dialogFlowFeature?.genSick
+          let newMessage = messageRes
+            .replace("${sym1}", genSick[0])
+            .replace("${sym2}", genSick[1])
+            .replace("${sym3}", genSick[2])
+          console.log(newMessage)
+          messageRes = newMessage
+        } else {
+          const sickName = dialogFlowFeature?.sickName
+          let newMessage = messageRes.replace(" ${sick_name}", sickName)
           messageRes = newMessage
         }
       }

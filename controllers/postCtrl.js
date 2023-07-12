@@ -1,6 +1,7 @@
 const Posts = require("../models/postModel")
 const Comments = require("../models/commentModel")
 const Users = require("../models/userModel")
+const Limit = require("../models/limitModel")
 const ObjectId = require("mongodb").ObjectId
 const { isObjectId } = require("../helpers/stringValidation")
 class APIfeatures {
@@ -32,9 +33,10 @@ function convertToUnaccentedString(str) {
 }
 let LimitsWord = ['Fucking', 'dm', 'dcmm']
 
-function KiemTraTuNguThoTuc(content) {
+async function KiemTraTuNguThoTuc(content) {
   const content1 = convertToUnaccentedString(content)
-  for (const word of LimitsWord) {
+  const limit = await Limit.find()
+  for (const word of limit[0]?.limit) {
     if (content1.includes(convertToUnaccentedString(word))) {
       return true
     }
@@ -46,7 +48,16 @@ function KiemTraTuNguThoTuc(content) {
 
 const postCtrl = {
   getAllLimitsWord: async (req, res) => {
-    res.status(200).send({ data: LimitsWord })
+    const LimitsWords = await Limit.find();
+    if (LimitsWords.length === 0) {
+      const a = new Limit({
+        limit: LimitsWord
+      })
+      await a.save()
+      res.status(200).send({ data: LimitsWord })
+    } else {
+      res.status(200).send({ data: LimitsWords[0].limit })
+    }
   },
 
   getPostByLocation: async (req, res) => {
@@ -78,8 +89,8 @@ const postCtrl = {
 
   updateAllLimitsWord: async (req, res) => {
     const { words } = req.body
-    LimitsWord = words
-    res.status(200).send({ data: LimitsWord })
+    await Limit.updateMany({}, { limit: words })
+    res.status(200).send({ data: words })
   },
 
   getAllPosts: async (req, res) => {
@@ -111,7 +122,7 @@ const postCtrl = {
 
       const features = new APIfeatures(Posts.find({}), objectSearch)
       let posts = await features.query
-        .sort("-createdAt")
+        .sort("-updatedAt")
         .populate("user likes", "avatar username fullname followers")
         .populate({
           path: "comments",
@@ -132,7 +143,7 @@ const postCtrl = {
   createPost: async (req, res) => {
     try {
       const { content, images, location } = req.body
-      const check = KiemTraTuNguThoTuc(content)
+      const check = await KiemTraTuNguThoTuc(content)
       if (check)
         return res.status(400).json({ msg: "Content contains no offensive words" })
 
@@ -160,10 +171,14 @@ const postCtrl = {
   },
   getPosts: async (req, res) => {
     try {
-      const features = new APIfeatures(Posts.find({}), req.query).paginating()
+      const features = new APIfeatures(Posts.find({
+        user: {
+          $in: req.user.following
+        }
+      }), req.query)
 
       const posts = await features.query
-        .sort("-createdAt")
+        .sort("-updatedAt")
         .populate("user likes", "avatar username fullname followers")
         .populate({
           path: "comments",
@@ -185,7 +200,7 @@ const postCtrl = {
   updatePost: async (req, res) => {
     try {
       const { content, images, location } = req.body
-      const check = KiemTraTuNguThoTuc(content)
+      const check = await KiemTraTuNguThoTuc(content)
       if (check)
         return res.status(400).json({ msg: "Content contains no offensive words" })
 
@@ -264,7 +279,7 @@ const postCtrl = {
         Posts.find({ user: req.params.id }),
         req.query
       ).paginating()
-      const posts = await features.query.sort("-createdAt")
+      const posts = await features.query.sort("-updatedAt")
 
       res.json({
         posts,
@@ -382,7 +397,7 @@ const postCtrl = {
           _id: { $in: req.user.saved }
         }),
         req.query
-      ).paginating()
+      )
 
       const savePosts = await features.query.sort("-createdAt").populate("user likes", "avatar username fullname followers")
         .populate({
