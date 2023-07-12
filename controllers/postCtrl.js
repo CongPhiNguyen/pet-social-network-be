@@ -384,7 +384,14 @@ const postCtrl = {
         req.query
       ).paginating()
 
-      const savePosts = await features.query.sort("-createdAt")
+      const savePosts = await features.query.sort("-createdAt").populate("user likes", "avatar username fullname followers")
+        .populate({
+          path: "comments",
+          populate: {
+            path: "user likes",
+            select: "-password"
+          }
+        })
 
       res.json({
         savePosts,
