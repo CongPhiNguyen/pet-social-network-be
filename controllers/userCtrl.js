@@ -97,9 +97,11 @@ const userCtrl = {
         .send({ success: false, message: "Username or email not found" })
       return
     }
+
+    // const code = "123456"
+
     // Update code in user
-    // const code = renderCode(6)
-    const code = "123456"
+    const code = renderCode(6)
     const currentTime = Date.now()
 
     await Users.findOneAndUpdate(
@@ -110,12 +112,12 @@ const userCtrl = {
       }
     )
 
-    // const email = userFind.email
-    // await sendMailNode(
-    //   "PET LOVE CODE VERIFICATION",
-    //   `Your verfication code of Petlove is: ${code}`,
-    //   email
-    // )
+    const email = userFind.email
+    await sendMailNode(
+      "PET LOVE CODE VERIFICATION",
+      `Your verfication code of Petlove is: ${code}`,
+      email
+    )
 
     return res.status(200).send({ success: true })
   },
@@ -131,9 +133,12 @@ const userCtrl = {
       return res.status(400).json({ msg: "UserId is not found" })
     }
 
+    // Comment it to static code
+    // const code = "123456"
+
     // Update code in user
-    // const code = renderCode(6)
-    const code = "123456"
+    const code = renderCode(6)
+
     const currentTime = Date.now()
 
     await Users.findByIdAndUpdate(id, {
@@ -141,12 +146,12 @@ const userCtrl = {
       timeSendCode: currentTime
     })
 
-    // const email = userInfo.email
-    // await sendMailNode(
-    //   "PET LOVE CODE VERIFICATION",
-    //   `Your verfication code of Petlove is: ${code}`,
-    //   email
-    // )
+    const email = userInfo.email
+    await sendMailNode(
+      "PET LOVE CODE VERIFICATION",
+      `Your verfication code of Petlove is: ${code}`,
+      email
+    )
 
     return res.status(200).send({ success: true })
   },
