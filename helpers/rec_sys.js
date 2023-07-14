@@ -65,16 +65,43 @@ const getRecommendUser = (listAllUserRaw, userId) => {
       }
     })
   } else {
-    console.log(userFollower)
     console.log("User đã follow: ", userFollower.join(","))
     const score = getScore(JSON.stringify(listAllUser), userFollower)
     score.sort((a, b) => b.score - a.score)
-    const finalUser = score.filter((val) => !userFollower.includes(val.userId))
-    console.log("Gợi ý cho người dùng", finalUser)
-    return finalUser.map((val) => ({
+    const finalUser = score.filter(
+      (val) => !userFollower.includes(val.userId) && val.userId !== userId
+    )
+    // Random user if not exceed 5
+    if (finalUser.length < 5) {
+      const listUserSuggestMore = [...listAllUser]
+        .filter(
+          (val) =>
+            !userFollower.includes(val._id) &&
+            !finalUser.find((finalUserVal) => finalUserVal.userId == val._id)
+        )
+        .sort((a, b) => Math.random() - Math.random())
+      const times = 5 - finalUser.length
+      for (let i = 0; i < times; i++) {
+        if (i >= listUserSuggestMore.length) break
+        finalUser.push({ userId: listUserSuggestMore[i]._id, score: 0 })
+      }
+    }
+
+    const finalRes = finalUser.map((val) => ({
       ...val,
       userInfo: getUserInfoById(JSON.stringify(listAllUser), val.userId)
     }))
+    console.log(
+      "Gợi ý cho người dùng",
+      finalRes.map((val) => {
+        return {
+          userId: val?.userId,
+          score: val?.score,
+          username: val?.userInfo?.username
+        }
+      })
+    )
+    return finalRes
   }
 }
 

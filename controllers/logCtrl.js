@@ -33,14 +33,14 @@ const petCtrl = {
       sort[sortValue?.sortColumn] = sortValue?.sortType === "desc" ? -1 : 1
     } else sort = defaultSort
     const logAccumulation = await Logs.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: new Date("2023-07-10"),
-            $lt: new Date("2023-07-11")
-          }
-        }
-      },
+      // {
+      //   $match: {
+      //     createdAt: {
+      //       $gte: new Date("2023-07-10"),
+      //       $lt: new Date("2023-07-11")
+      //     }
+      //   }
+      // },
       {
         $match: {
           $or: [
