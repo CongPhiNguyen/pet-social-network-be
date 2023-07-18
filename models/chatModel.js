@@ -5,7 +5,8 @@ const chatSchema = new mongoose.Schema(
     userId: String,
     session: String,
     message: Array,
-    bot: String
+    bot: String,
+    lastGreetTime: Date
   },
   {
     timestamps: true

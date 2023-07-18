@@ -135,6 +135,43 @@ const messageCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
+  addGreetMesssageApi: async (req, res) => {
+    const { userId, botName, messageList: messageAddList } = req.body
+    console.log(botName)
+    console.log(userId, botName)
+    let userChat = await Chat.findOne({ userId: userId, bot: botName })
+    if (!userChat) {
+      const userChatInfo = {
+        userId: userId,
+        session: sessionPath,
+        message: [],
+        bot: botName
+      }
+      await new Chat(userChatInfo).save()
+      console.log("create new")
+    }
+
+    userChat = await Chat.findOne({ userId: userId, bot: botName })
+    const messageList = userChat.message
+
+    for (const text of messageAddList) {
+      messageList.push({
+        text: text,
+        time: Date.now(),
+        sender: botName
+      })
+    }
+
+    await Chat.findOneAndUpdate(
+      { userId: userId, bot: botName },
+      { message: messageList, lastGreetTime: Date.now() }
+    )
+
+    // const
+
+    //
+    res.status(200).send({ success: true, messageList: messageList })
+  },
   dialogFlowApi: async (req, res) => {
     const { userId, message } = req.body
     let userChat = await Chat.findOne({ userId: userId, bot: "dialogflow" })
@@ -376,9 +413,11 @@ const messageCtrl = {
   getBotMessage: async (req, res) => {
     const { botName, userId } = req.query
     const userChat = await Chat.findOne({ bot: botName, userId: userId })
-    return res
-      .status(200)
-      .send({ success: false, messageList: userChat?.message || [] })
+    return res.status(200).send({
+      success: false,
+      messageList: userChat?.message || [],
+      lastGreetTime: userChat?.lastGreetTime || "Not a valid time"
+    })
   },
   getFact: async (req, res) => {
     const val = await Fact.find({})

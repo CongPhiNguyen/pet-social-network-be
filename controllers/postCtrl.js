@@ -21,17 +21,17 @@ class APIfeatures {
 
 function convertToUnaccentedString(str) {
   // Chuẩn hóa chuỗi Unicode để xử lý các ký tự có dấu
-  const normalizedString = str.normalize('NFD');
+  const normalizedString = str.normalize("NFD")
 
   // Sử dụng regular expression để loại bỏ các ký tự không phải là chữ cái Latin
-  const unaccentedString = normalizedString.replace(/[\u0300-\u036f]/g, '');
+  const unaccentedString = normalizedString.replace(/[\u0300-\u036f]/g, "")
 
   // Chuyển đổi thành chữ thường
-  const lowercaseString = unaccentedString.toLowerCase();
+  const lowercaseString = unaccentedString.toLowerCase()
 
-  return lowercaseString;
+  return lowercaseString
 }
-let LimitsWord = ['Fucking', 'dm', 'dcmm']
+let LimitsWord = ["Fucking", "dm", "dcmm"]
 
 async function KiemTraTuNguThoTuc(content) {
   const content1 = convertToUnaccentedString(content)
@@ -44,11 +44,9 @@ async function KiemTraTuNguThoTuc(content) {
   return false
 }
 
-
-
 const postCtrl = {
   getAllLimitsWord: async (req, res) => {
-    const LimitsWords = await Limit.find();
+    const LimitsWords = await Limit.find()
     if (LimitsWords.length === 0) {
       const a = new Limit({
         limit: LimitsWord
@@ -63,12 +61,13 @@ const postCtrl = {
   getPostByLocation: async (req, res) => {
     let { location } = req.body
     let arrLocation = location.split(",")
-    arrLocation = arrLocation.map(word => word.trim())
-    arrLocation = arrLocation.filter(word => isNaN(word))
+    arrLocation = arrLocation.map((word) => word.trim())
+    arrLocation = arrLocation.filter((word) => isNaN(word))
     arrLocation = arrLocation.splice(-3)
     // const posts = await Posts.find({ location: { $in: arrLocation } })
 
-    let posts = await Posts.find().populate("user likes", "avatar username fullname followers")
+    let posts = await Posts.find()
+      .populate("user likes", "avatar username fullname followers")
       .populate({
         path: "comments",
         populate: {
@@ -76,12 +75,14 @@ const postCtrl = {
           select: "-password"
         }
       })
+      .sort({ createdAt: -1 })
 
-    posts = posts.filter(post => {
-      const includesWord = arrLocation.every(word => post.location.includes(word));
+    posts = posts.filter((post) => {
+      const includesWord = arrLocation.every((word) =>
+        post.location.includes(word)
+      )
       if (includesWord) return true
       return false
-
     })
 
     res.status(200).send({ data: posts })
@@ -96,8 +97,9 @@ const postCtrl = {
   getAllPosts: async (req, res) => {
     try {
       const { username } = req.query
-      const objectSearch = {};
-      if (username && username !== 'undefined') objectSearch['username'] = new RegExp(username);
+      const objectSearch = {}
+      if (username && username !== "undefined")
+        objectSearch["username"] = new RegExp(username)
       // const posts = await Posts.find(objectSearch)
       // const posts = await Posts.aggregate([
       //   // {
@@ -132,7 +134,10 @@ const postCtrl = {
           }
         })
 
-      posts = username && username !== 'undefined' ? posts.filter((post) => post?.user?.username.includes(username)) : posts
+      posts =
+        username && username !== "undefined"
+          ? posts.filter((post) => post?.user?.username.includes(username))
+          : posts
 
       res.status(200).send(posts)
     } catch (err) {
@@ -145,7 +150,9 @@ const postCtrl = {
       const { content, images, location } = req.body
       const check = await KiemTraTuNguThoTuc(content)
       if (check)
-        return res.status(400).json({ msg: "Content contains no offensive words" })
+        return res
+          .status(400)
+          .json({ msg: "Content contains no offensive words" })
 
       if (images.length === 0)
         return res.status(400).json({ msg: "Please add your photo." })
@@ -171,11 +178,14 @@ const postCtrl = {
   },
   getPosts: async (req, res) => {
     try {
-      const features = new APIfeatures(Posts.find({
-        user: {
-          $in: req.user.following
-        }
-      }), req.query)
+      const features = new APIfeatures(
+        Posts.find({
+          user: {
+            $in: req.user.following
+          }
+        }),
+        req.query
+      )
 
       const posts = await features.query
         .sort("-updatedAt")
@@ -202,7 +212,9 @@ const postCtrl = {
       const { content, images, location } = req.body
       const check = await KiemTraTuNguThoTuc(content)
       if (check)
-        return res.status(400).json({ msg: "Content contains no offensive words" })
+        return res
+          .status(400)
+          .json({ msg: "Content contains no offensive words" })
 
       const post = await Posts.findOneAndUpdate(
         { _id: req.params.id },
@@ -399,7 +411,9 @@ const postCtrl = {
         req.query
       )
 
-      const savePosts = await features.query.sort("-createdAt").populate("user likes", "avatar username fullname followers")
+      const savePosts = await features.query
+        .sort("-createdAt")
+        .populate("user likes", "avatar username fullname followers")
         .populate({
           path: "comments",
           populate: {

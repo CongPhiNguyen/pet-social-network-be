@@ -12,6 +12,8 @@ router.delete("/message/:id", auth, messageCtrl.deleteMessages)
 
 router.delete("/conversation/:id", auth, messageCtrl.deleteConversation)
 
+router.post("/add-greet-message", messageCtrl.addGreetMesssageApi)
+
 router.post("/dialogflow-api", messageCtrl.dialogFlowApi)
 
 router.post("/chat/dummy", messageCtrl.dummyBotApi)
