@@ -134,9 +134,15 @@ const postCtrl = {
           }
         })
 
+      console.log(username)
+
       posts =
         username && username !== "undefined"
-          ? posts.filter((post) => post?.user?.username.includes(username))
+          ? posts.filter(
+              (post) =>
+                post?.user?.username.includes(username) ||
+                post?.user?.username === username
+            )
           : posts
 
       res.status(200).send(posts)
@@ -147,7 +153,7 @@ const postCtrl = {
 
   createPost: async (req, res) => {
     try {
-      const { content, images, location } = req.body
+      const { content, images, location, hashtag } = req.body
       const check = await KiemTraTuNguThoTuc(content)
       if (check)
         return res
@@ -161,6 +167,7 @@ const postCtrl = {
         content,
         location,
         images,
+        hashtag,
         user: req.user._id
       })
       await newPost.save()
@@ -181,7 +188,8 @@ const postCtrl = {
       const features = new APIfeatures(
         Posts.find({
           user: {
-            $in: req.user.following
+            // $in: [...req.user.following, req?.user?._id]
+            $in: [...req.user.following]
           }
         }),
         req.query
@@ -207,9 +215,54 @@ const postCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
-  updatePost: async (req, res) => {
+  getPostWithHashTag: async (req, res) => {
+    const hashtag = req.query?.hashTag
     try {
-      const { content, images, location } = req.body
+      const features = new APIfeatures(
+        Posts.find({ hashtag: hashtag }),
+        req.query
+      )
+
+      const posts = await features.query
+        .sort("-updatedAt")
+        .populate("user likes", "avatar username fullname followers")
+        .populate({
+          path: "comments",
+          populate: {
+            path: "user likes",
+            select: "-password"
+          }
+        })
+
+      // Get hashtag list
+      const hashTagObject = {}
+      for (const post of posts) {
+        for (const hashtag of post?.hashtag || []) {
+          hashTagObject[hashtag] ??= 0
+          hashTagObject[hashtag]++
+        }
+      }
+      const hashTagList = []
+      for (const key of Object.keys(hashTagObject)) {
+        hashTagList.push({ hashTag: key, count: hashTagObject[key] })
+      }
+      hashTagList.sort((a, b) => b?.count - a?.count)
+      res.json({
+        msg: "Success!",
+        result: posts.length,
+        posts,
+        hashTagList
+      })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ msg: err.message })
+    }
+  },
+  updatePost: async (req, res) => {
+    console.log("Run")
+    try {
+      const { content, images, location, hashtag } = req.body
+      console.log(hashtag)
       const check = await KiemTraTuNguThoTuc(content)
       if (check)
         return res
@@ -221,7 +274,8 @@ const postCtrl = {
         {
           content,
           location,
-          images
+          images,
+          hashtag
         }
       )
         .populate("user likes", "avatar username fullname")

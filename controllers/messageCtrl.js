@@ -162,10 +162,10 @@ const messageCtrl = {
       })
     }
 
-    await Chat.findOneAndUpdate(
-      { userId: userId, bot: botName },
-      { message: messageList, lastGreetTime: Date.now() }
-    )
+    // await Chat.findOneAndUpdate(
+    //   { userId: userId, bot: botName },
+    //   { message: messageList, lastGreetTime: Date.now() }
+    // )
 
     // const
 
@@ -416,7 +416,8 @@ const messageCtrl = {
     return res.status(200).send({
       success: false,
       messageList: userChat?.message || [],
-      lastGreetTime: userChat?.lastGreetTime || "Not a valid time"
+      lastGreetTime: userChat?.lastGreetTime || "Not a valid time",
+      updatedAt: userChat?.updatedAt || "Not a valid time"
     })
   },
   getFact: async (req, res) => {

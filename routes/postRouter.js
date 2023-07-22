@@ -6,7 +6,7 @@ router.get("/get-all-posts", postCtrl.getAllPosts)
 router.get("/get-all-limits-word", postCtrl.getAllLimitsWord)
 router.post("/get-all-limits-word", postCtrl.updateAllLimitsWord)
 router.post("/location", postCtrl.getPostByLocation)
-
+router.get("/get-post/feed", postCtrl.getPostWithHashTag)
 router
   .route("/posts")
   .post(auth, postCtrl.createPost)

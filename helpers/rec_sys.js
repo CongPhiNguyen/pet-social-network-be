@@ -65,7 +65,7 @@ const getRecommendUser = (listAllUserRaw, userId) => {
       }
     })
   } else {
-    console.log("User đã follow: ", userFollower.join(","))
+    // console.log("User đã follow: ", userFollower.join(","))
     const score = getScore(JSON.stringify(listAllUser), userFollower)
     score.sort((a, b) => b.score - a.score)
     const finalUser = score.filter(
@@ -91,16 +91,16 @@ const getRecommendUser = (listAllUserRaw, userId) => {
       ...val,
       userInfo: getUserInfoById(JSON.stringify(listAllUser), val.userId)
     }))
-    console.log(
-      "Gợi ý cho người dùng",
-      finalRes.map((val) => {
-        return {
-          userId: val?.userId,
-          score: val?.score,
-          username: val?.userInfo?.username
-        }
-      })
-    )
+    // console.log(
+    //   "Gợi ý cho người dùng",
+    //   finalRes.map((val) => {
+    //     return {
+    //       userId: val?.userId,
+    //       score: val?.score,
+    //       username: val?.userInfo?.username
+    //     }
+    //   })
+    // )
     return finalRes
   }
 }

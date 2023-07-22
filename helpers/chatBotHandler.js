@@ -174,8 +174,11 @@ const handleIntent = async (queryResult) => {
         }
       }
     }
-
+    case "ask.probality": {
+      return { name: queryResult?.intent?.displayName }
+    }
     default: {
+      return {}
     }
   }
 }

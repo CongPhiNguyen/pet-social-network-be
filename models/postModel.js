@@ -13,7 +13,8 @@ const postSchema = new mongoose.Schema(
     },
     likes: [{ type: mongoose.Types.ObjectId, ref: "user" }],
     comments: [{ type: mongoose.Types.ObjectId, ref: "comment" }],
-    user: { type: mongoose.Types.ObjectId, ref: "user" }
+    user: { type: mongoose.Types.ObjectId, ref: "user" },
+    hashtag: [{ type: String }]
   },
   {
     timestamps: true
